@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Roleplay AI (Browser Only)</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial;margin:2rem;max-width:900px}
+    #chat{border:1px solid #ddd;padding:1rem;height:60vh;overflow:auto;white-space:pre-wrap}
+    input,textarea{width:100%;margin-top:0.5rem;padding:0.5rem;font-size:1rem}
+    button{padding:0.6rem 1.2rem;margin-top:0.5rem}
+  </style>
+</head>
+<body>
+  <h2>Roleplay AI (client-side)</h2>
+
+  <label>🔑 Your OpenAI API Key (kept in browser memory only)
+    <input type="password" id="apiKey" placeholder="sk-...">
+  </label>
+
+  <div id="chat"></div>
+
+  <textarea id="msg" rows="2" placeholder="Say something..."></textarea>
+  <button id="send">Send</button>
+
+  <script>
+    const chatBox = document.getElementById('chat');
+    const msgBox  = document.getElementById('msg');
+    const sendBtn = document.getElementById('send');
+
+    const persona = "You are a friendly, imaginative AI for safe fictional roleplay. Stay in-character, never give real-world instructions for harm or illegal acts.";
+
+    let history = [{role:"system", content: persona}];
+
+    function append(role, text){
+      chatBox.textContent += `\n${role}: ${text}\n---\n`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    sendBtn.onclick = async () => {
+      const key = document.getElementById('apiKey').value.trim();
+      if(!key){alert("Enter your OpenAI API key first.");return;}
+      const msg = msgBox.value.trim();
+      if(!msg)return;
+      msgBox.value="";
+      append("You", msg);
+      history.push({role:"user", content: msg});
+
+      try{
+        const r = await fetch("https://api.openai.com/v1/chat/completions",{
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json",
+            "Authorization":"Bearer "+key
+          },
+          body:JSON.stringify({
+            model:"gpt-3.5-turbo",
+            messages: history,
+            max_tokens:300,
+            temperature:0.9
+          })
+        });
+        const data = await r.json();
+        if(!r.ok){append("Error", JSON.stringify(data));return;}
+        const text = data.choices[0].message.content;
+        append("AI", text);
+        history.push({role:"assistant", content: text});
+      }catch(e){
+        append("Error", e.message);
+      }
+    };
+  </script>
+</body>
+</html>
