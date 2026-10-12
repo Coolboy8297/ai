@@ -48,7 +48,7 @@ const SYSTEM=`You are COMMAND AI, a helpful and honest browser-based assistant. 
 function say(text,kind='assistant'){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight;return el}
 function status(ok,text){$('statusDot').classList.toggle('ok',ok);$('statusText').textContent=text}
 function safeCalc(expression){
- const s=String(expression).replace(/\s+/g,''); if(!s||s.length>100||!/^[0-9.+*/()%\-]+$/.test(s))throw Error('Only arithmetic expressions are allowed.');
+ const s=String(expression).replace(/\\s+/g,''); if(!s||s.length>100||!/^[0-9.+*\\/()%\\-]+$/.test(s))throw Error('Only arithmetic expressions are allowed.');
  let i=0;
  function expr(){let v=term();while(s[i]==='+'||s[i]==='-'){const op=s[i++],r=term();v=op==='+'?v+r:v-r}return v}
  function term(){let v=factor();while(s[i]==='*'||s[i]==='/'){const op=s[i++],r=factor();if(op==='/'&&r===0)throw Error('Division by zero.');v=op==='*'?v*r:v/r}return v}
