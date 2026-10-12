@@ -17,6 +17,7 @@ Open the live editor in a modern browser with WebGL enabled and an internet conn
 - Inspector for object names, position, rotation, scale, color, and material roughness
 - Translate, rotate, and scale gizmos
 - Play mode with WASD movement, mouse look, Space to move up, Shift to move down, and Escape to stop
+- Modular runtime core (`engine-core.js`) with entity/component storage, event bus, vector math, AABB/ray queries, action bindings, asset cache, fixed-step clock, and Web Audio helpers
 - Per-object JavaScript update scripts
 - Import GLB/GLTF models
 - Save a scene in browser storage, export JSON, and import JSON
@@ -46,11 +47,25 @@ function update(dt, object, api) {
 }
 ```
 
-The script runs only in Play mode. The API object currently exposes `scene`, `camera`, `THREE`, and `playMode`. Scripts execute as JavaScript in the page, so only run scripts you trust.
+The script runs only in Play mode. The API object exposes `scene`, `camera`, `THREE`, `playMode`, and `engine`, `world`, `events`, `input`, `assets`, `audio`, plus `Vec3`, `AABB`, `EventBus`, `World`, `Entity`, `rayAABB`, and `FixedStepClock`. Scripts execute as JavaScript in the page, so only run scripts you trust.
 
 ## Persistence
 
 **Save** stores scene JSON in the current browser's local storage. **Export Scene** downloads a portable JSON file. **Import JSON** loads a previously exported FORGE scene. Imported GLB/GLTF models are currently runtime-only and are not included in scene JSON.
+
+## Runtime core quick example
+
+Inside an object script, use the core utilities like this:
+
+```js
+function update(dt, object, api) {
+  const direction = new api.Vec3(1, 0, 0).multiplyScalar(dt);
+  object.position.x += direction.x;
+  api.events.emit('sample:tick', { time: performance.now() });
+}
+```
+
+The core's `World` and components are available to scripts and extensions. They are currently a general runtime layer; the visual scene objects are still represented by Three.js objects and are not automatically mirrored into the ECS world.
 
 ## Current limitations
 
