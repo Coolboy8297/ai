@@ -46,7 +46,7 @@ const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});rend
 const scene=new THREE.Scene();scene.background=new THREE.Color('#111a27');scene.fog=new THREE.Fog('#111a27',28,85);
 const camera=new THREE.PerspectiveCamera(60,viewport.clientWidth/viewport.clientHeight,.1,500);camera.position.set(8,6,10);camera.lookAt(0,0,0);
 const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,1,0);orbit.enableDamping=true;orbit.dampingFactor=.075;orbit.maxPolarAngle=Math.PI*.495;
-const gizmo=new TransformControls(camera,renderer.domElement);gizmo.addEventListener('dragging-changed',e=>orbit.enabled=!e.value&&!playing);gizmo.addEventListener('objectChange',()=>{if(selected)renderInspector()});scene.add(gizmo.getHelper());const gltfLoader=new GLTFLoader();let scriptPanelOpen=false,history=[],historyIndex=-1,historyBusy=false;
+const gizmo=new TransformControls(camera,renderer.domElement);gizmo.addEventListener('dragging-changed',e=>orbit.enabled=!e.value&&!playing);gizmo.addEventListener('objectChange',()=>{if(selected)renderInspector()});scene.add(gizmo);const gltfLoader=new GLTFLoader();let scriptPanelOpen=false,history=[],historyIndex=-1,historyBusy=false;
 scene.add(new THREE.HemisphereLight(0xaacbff,0x263040,2.1));
 const keyLight=new THREE.DirectionalLight(0xffe3c2,3.3);keyLight.position.set(6,12,5);keyLight.castShadow=true;keyLight.shadow.mapSize.set(1024,1024);scene.add(keyLight);
 const fillLight=new THREE.DirectionalLight(0x5d94ff,1.1);fillLight.position.set(-7,4,-6);scene.add(fillLight);
