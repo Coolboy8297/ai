@@ -44,7 +44,7 @@ main{max-width:1120px;margin:0 auto;padding:28px 18px 40px}.intro h1{font-size:c
 <script type="module">
 const $=id=>document.getElementById(id);
 let engine=null,loading=false,history=[],attachedFiles=[],busy=false;
-const SYSTEM="You are COMMAND AI, a helpful and honest browser-based assistant. You may call a tool by responding with ONLY one JSON object like {\\"tool\\":\\"calculator\\",\\"arguments\\":{\\"expression\\":\\"2+2\\"}}. Available tools: calculator with expression; current_time with no arguments; open_website with url; list_attached_files with no arguments; read_attached_file with filename. Only use tools when needed. Never claim an action succeeded unless the tool result confirms it. Tool access is limited to this page and files explicitly selected by the user. Do not claim to have internet search, arbitrary computer access, or image vision. If a tool result arrives, answer the original user using that result.";
+const SYSTEM=`You are COMMAND AI, a helpful and honest browser-based assistant. You may call a tool by responding with ONLY one JSON object like {"tool":"calculator","arguments":{"expression":"2+2"}}. Available tools: calculator with expression; current_time with no arguments; open_website with url; list_attached_files with no arguments; read_attached_file with filename. Only use tools when needed. Never claim an action succeeded unless the tool result confirms it. Tool access is limited to this page and files explicitly selected by the user. Do not claim to have internet search, arbitrary computer access, or image vision. If a tool result arrives, answer the original user using that result.`;
 function say(text,kind='assistant'){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight;return el}
 function status(ok,text){$('statusDot').classList.toggle('ok',ok);$('statusText').textContent=text}
 function safeCalc(expression){
@@ -69,7 +69,7 @@ async function agentReply(userText){
   const response=await engine.chat.completions.create({messages,temperature:0.3,max_tokens:700});
   const answer=String(response.choices?.[0]?.message?.content||'').trim();
   let call=null;
-  try{const cleaned=answer.replace(/^\`\`\`(?:json)?\s*/i,'').replace(/\s*\`\`\`$/,'');const obj=JSON.parse(cleaned);if(obj&&typeof obj.tool==='string')call=obj}catch{}
+  try{const cleaned=answer.replace(/^\`\`\`(?:json)?\\s*/i,'').replace(/\\s*\`\`\`$/,'');const obj=JSON.parse(cleaned);if(obj&&typeof obj.tool==='string')call=obj}catch{}
   if(!call||!$('agentMode').checked)return answer||'(No response returned.)';
   let result;
   try{result=await runTool(call.tool,call.arguments||{})}catch(e){result={error:e.message}}
