@@ -1,29 +1,31 @@
-# Command AI
+# COMMAND AI
 
-A command-driven web interface for local Ollama models. GitHub Pages hosts the interface; Ollama runs on your computer.
+COMMAND AI is a modular local AI assistant UI for Ollama. GitHub hosts the source; run the companion on your Debian/Linux computer for local model access and approved tools.
 
-## Run locally
+## Quick start (Debian/Linux)
 
-Open `index.html` in a browser, or serve this folder with a static web server. Start Ollama first, then choose **Connect to Ollama**.
+1. Make sure Ollama is installed and a model is downloaded, for example `ollama pull qwen2.5:1.5b`.
+2. Open a terminal in this repository folder.
+3. Run `chmod +x start.sh && ./start.sh`.
+4. Open **http://127.0.0.1:8765** in your browser.
+5. Press Connect, choose a model, then enable Agent mode for tool use.
 
-## Ollama cross-origin access
+The companion uses Python's standard library; no pip packages or virtual environment are required. It proxies requests to Ollama and serves the UI on localhost, avoiding the common GitHub Pages-to-local-Ollama CORS problem. Set `OLLAMA_HOST` or `COMMAND_AI_PORT` environment variables to customize the endpoints.
 
-The hosted GitHub Pages site needs permission to call your local Ollama server. Configure Ollama's `OLLAMA_ORIGINS` to include your exact Pages origin, then restart Ollama. For this repository, that origin will normally be `https://coolboy8297.github.io` if Pages is published as a project site. Browser and operating-system security rules can affect requests from HTTPS pages to localhost; if the hosted site cannot connect, test the interface locally or use a trusted local HTTPS bridge.
+## Current capabilities
 
-Do not expose Ollama's port to the public internet. Keep it bound to your own machine.
+- Chat with installed local Ollama models; image attachments and one-shot webcam capture work with vision-capable models.
+- Agent mode: the model can request bounded tools and use their results in a short tool loop.
+- Tools: system information, local Ollama model list, list files in the home folder, read small text files in the home folder, and a strict safe-command allowlist (`pwd`, `whoami`, `date`, `uname -a`, `df -h`, `free -h`, `uptime`, `python --version`, `ollama list`, `git status`).
+- `/time`, `/models`, `/clear`, and `open https://example.com`.
+- No third-party dependencies.
 
-## Current commands
+## Safety and limitations
 
-- Chat with the selected local Ollama model.
-- `/time`: show the browser's current date and time.
-- `/models`: refresh the local model list.
-- `/clear`: clear the conversation.
-- `open https://example.com`: open a website in a new tab.
-- Attach an image for analysis with a vision-capable Ollama model.
-- Open the webcam and capture a frame for image analysis.
+This is intentionally **not** unrestricted remote shell access. The companion binds only to `127.0.0.1`, restricts file access to your home folder, only reads files, and only runs exact allowlisted commands. It does not install software, delete files, modify system settings, control other apps, continuously monitor the webcam, or perform background surveillance. Those features would require additional explicit permission and separate implementation.
 
-## Limits
+Images are sent to the selected local Ollama model. Webcam use requires browser permission and is only started after pressing the camera button. Conversation content stays in browser memory unless you choose to send it to the local model. Do not expose the companion or Ollama ports to the public internet.
 
-This is a static website, so it cannot run arbitrary shell commands or access local files on its own. The webcam requires browser permission. Live object tracking and general-purpose operating-system actions need a separate local companion service and explicit permissions; they are not silently enabled by this page.
+## GitHub Pages
 
-Conversation history is held in page memory; the Ollama endpoint setting is stored in browser local storage. Images are sent to the selected local Ollama model when you submit them.
+The Pages site can host the static UI, but for best results use the local companion at `http://127.0.0.1:8765`. Enable **Settings → Pages → Build and deployment → GitHub Actions** to publish the static site. GitHub Pages cannot itself host the Python companion process.
