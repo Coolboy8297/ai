@@ -48,7 +48,7 @@ const SYSTEM=`You are COMMAND AI, a helpful and honest browser-based assistant. 
 function say(text,kind='assistant'){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight;return el}
 function status(ok,text){$('statusDot').classList.toggle('ok',ok);$('statusText').textContent=text}
 function safeCalc(expression){
- const s=String(expression).replace(/\\s+/g,''); if(!s||s.length>100||!/^[0-9.+*\\/()%\\-]+$/.test(s))throw Error('Only arithmetic expressions are allowed.');
+ const s=String(expression).replaceAll(' ',''); if(!s||s.length>100)throw Error('Only arithmetic expressions are allowed.'); for(const ch of s){if(!'0123456789.+*/()%-'.includes(ch))throw Error('Only arithmetic expressions are allowed.');}
  let i=0;
  function expr(){let v=term();while(s[i]==='+'||s[i]==='-'){const op=s[i++],r=term();v=op==='+'?v+r:v-r}return v}
  function term(){let v=factor();while(s[i]==='*'||s[i]==='/'){const op=s[i++],r=factor();if(op==='/'&&r===0)throw Error('Division by zero.');v=op==='*'?v*r:v/r}return v}
@@ -69,7 +69,7 @@ async function agentReply(userText){
   const response=await engine.chat.completions.create({messages,temperature:0.3,max_tokens:700});
   const answer=String(response.choices?.[0]?.message?.content||'').trim();
   let call=null;
-  try{const cleaned=answer.replace(/^\`\`\`(?:json)?\\s*/i,'').replace(/\\s*\`\`\`$/,'');const obj=JSON.parse(cleaned);if(obj&&typeof obj.tool==='string')call=obj}catch{}
+  try{const obj=JSON.parse(answer);if(obj&&typeof obj.tool==='string')call=obj}catch{}
   if(!call||!$('agentMode').checked)return answer||'(No response returned.)';
   let result;
   try{result=await runTool(call.tool,call.arguments||{})}catch(e){result={error:e.message}}
