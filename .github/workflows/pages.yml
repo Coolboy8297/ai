@@ -23,14 +23,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Validate local companion
+      - name: Validate browser JavaScript
         run: |
-          python3 -m py_compile agent.py
-          sh -n start.sh
+          python3 - <<'PY'
+          import re
+          source = open("index.html", encoding="utf-8").read()
+          match = re.search(r'<script type="module">(.*?)</script>', source, re.S)
+          if not match:
+              raise SystemExit("Browser JavaScript module not found")
+          open("/tmp/command-ai-check.mjs", "w", encoding="utf-8").write(match.group(1))
+          PY
+          node --check /tmp/command-ai-check.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
