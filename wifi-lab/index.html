@@ -1,107 +1,130 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#080c12">
-<title>W10 Lab — Wireless Simulator</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080c12"><title>W10 Lab — Wireless Network Simulator</title>
 <style>
-:root{color-scheme:dark;--bg:#080c12;--panel:#101722;--panel2:#141e2b;--line:#263448;--text:#e8eef8;--muted:#91a0b5;--mint:#71e4c1;--blue:#79a9ff;--amber:#ffca78}
+:root{color-scheme:dark;--bg:#080c12;--panel:#101722;--line:#263448;--text:#e8eef8;--muted:#91a0b5;--mint:#71e4c1;--blue:#79a9ff;--amber:#ffca78;--red:#ff8282}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -12%,#1c344c 0,transparent 55%),var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-header{height:66px;padding:0 clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#080c12c9;position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
-.brand{font-weight:900;letter-spacing:.14em}.brand b{color:var(--mint)}.headright{color:var(--muted);font-size:11px;letter-spacing:.12em}
-main{width:min(1240px,100%);margin:auto;padding:30px 20px 50px}.eyebrow{color:var(--mint);font-size:10px;letter-spacing:.2em;font-weight:850}
-h1{font-size:clamp(34px,5vw,54px);letter-spacing:-.05em;line-height:1.04;margin:9px 0 12px}.lead{color:var(--muted);max-width:690px;margin:0 0 25px}
-.hero{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap}.status{border:1px solid #31564d;border-radius:99px;padding:7px 11px;color:var(--mint);font-size:11px;letter-spacing:.07em}
-.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:24px 0}.metric,.panel{background:linear-gradient(145deg,#141e2b,#0d131d 85%);border:1px solid var(--line);border-radius:15px}.metric{padding:17px}.mlabel{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}.mvalue{font-size:clamp(23px,3vw,34px);font-weight:850;letter-spacing:-.04em;margin:6px 0 1px}.msub{font-size:11px;color:var(--muted)}
-.layout{display:grid;grid-template-columns:minmax(270px,.82fr) minmax(0,1.5fr);gap:14px}.panel{padding:20px;min-width:0}.ptitle{font-size:17px;font-weight:800;letter-spacing:-.02em}.psub{font-size:12px;color:var(--muted);margin:3px 0 18px}
-.control{margin:19px 0}.ctop{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;font-weight:650}.ctop output{color:var(--mint);font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--mint);cursor:pointer}.ticks{display:flex;justify-content:space-between;color:#728198;font-size:10px;margin-top:3px}
-select{width:100%;background:#0a111a;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;margin-top:7px}
-.switchrow{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid var(--line);padding-top:15px;margin-top:15px}.switchrow small{display:block;color:var(--muted);font-size:11px}.switch{accent-color:var(--mint);width:19px;height:19px}
-button{font:inherit;cursor:pointer;border:1px solid #31564d;background:#12251f;color:var(--mint);border-radius:9px;padding:10px 13px;font-weight:750}button:hover{background:#18352b}.buttons{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
-.chartbox{height:230px;position:relative;margin-top:8px}canvas{width:100%;height:100%;display:block}.chartlegend{display:flex;gap:15px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:var(--mint)}.dot.blue{background:var(--blue)}.dot.amber{background:var(--amber)}
-.rightstack{display:grid;gap:14px}.submetrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.mini{background:#0a111a;border:1px solid var(--line);border-radius:10px;padding:12px}.mini b{font-size:18px;display:block}.mini span{color:var(--muted);font-size:10px}
-.note{margin-top:14px;border-left:2px solid var(--amber);padding:10px 12px;background:#211b12;color:#d9c5a4;border-radius:0 8px 8px 0;font-size:12px}
-.table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}.table td,.table th{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line)}.table th{color:var(--muted);font-weight:600}.table td:last-child,.table th:last-child{text-align:right}
-footer{color:#718198;font-size:11px;margin-top:23px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}a{color:var(--mint);text-decoration:none}a:hover{text-decoration:underline}
-@media(max-width:850px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:480px){main{padding:22px 13px 35px}.panel{padding:15px}.submetrics{grid-template-columns:1fr 1fr}.headright{display:none}}
+header{height:64px;padding:0 clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:#080c12d9;position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}
+.brand{font-weight:900;letter-spacing:.14em}.brand b{color:var(--mint)}.headright{color:var(--muted);font-size:11px;letter-spacing:.1em}
+main{width:min(1280px,100%);margin:auto;padding:28px 20px 45px}.eyebrow{color:var(--mint);font-size:10px;letter-spacing:.2em;font-weight:850}h1{font-size:clamp(32px,5vw,52px);line-height:1.04;letter-spacing:-.05em;margin:10px 0}.lead{color:var(--muted);max-width:760px;margin:0 0 22px}.hero{display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap}.pill{border:1px solid #31564d;border-radius:99px;padding:7px 11px;color:var(--mint);font-size:11px;white-space:nowrap}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:22px 0}.metric,.panel{background:linear-gradient(145deg,#141e2b,#0d131d 85%);border:1px solid var(--line);border-radius:14px}.metric{padding:15px}.label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}.value{font-size:clamp(23px,3vw,34px);font-weight:850;letter-spacing:-.04em;margin:6px 0}.sub{font-size:11px;color:var(--muted)}
+.layout{display:grid;grid-template-columns:minmax(260px,.78fr) minmax(0,1.6fr);gap:13px}.panel{padding:18px;min-width:0}.ptitle{font-size:17px;font-weight:800;letter-spacing:-.02em}.psub{font-size:12px;color:var(--muted);margin:3px 0 17px}.control{margin:18px 0}.ctop{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px;font-weight:650}.ctop output{color:var(--mint);font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--mint);cursor:pointer}.ticks{display:flex;justify-content:space-between;color:#728198;font-size:10px;margin-top:2px}
+select{width:100%;background:#0a111a;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;margin-top:7px}button{font:inherit;cursor:pointer;border:1px solid #31564d;background:#12251f;color:var(--mint);border-radius:9px;padding:9px 12px;font-weight:750}button:hover{background:#18352b}.buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.switchrow{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:13px;margin-top:14px}.switchrow small{display:block;color:var(--muted);font-size:11px}.switch{accent-color:var(--mint);width:18px;height:18px}
+.stack{display:grid;gap:13px}.chartbox{height:235px;margin-top:5px}.chartbox canvas{width:100%;height:100%;display:block}.legend{display:flex;gap:13px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:8px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mint);margin-right:5px}.dot.blue{background:var(--blue)}.dot.amber{background:var(--amber)}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}.mini{background:#0a111a;border:1px solid var(--line);border-radius:10px;padding:11px}.mini b{display:block;font-size:17px}.mini span{color:var(--muted);font-size:10px}
+.compare{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}.compare th,.compare td{padding:10px 7px;text-align:right;border-bottom:1px solid var(--line)}.compare th:first-child,.compare td:first-child{text-align:left}.compare th{color:var(--muted);font-weight:600}.good{color:var(--mint)}.warn{color:var(--amber)}
+.note{margin-top:12px;border-left:2px solid var(--amber);padding:10px 12px;background:#211b12;color:#d9c5a4;border-radius:0 8px 8px 0;font-size:11px}.fineprint{font-size:11px;color:var(--muted);line-height:1.6;margin-top:12px}
+footer{color:#718198;font-size:11px;margin-top:22px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}a{color:var(--mint);text-decoration:none}a:hover{text-decoration:underline}
+@media(max-width:880px){.layout{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:500px){main{padding:20px 12px 32px}.panel{padding:14px}.cards{grid-template-columns:1fr 1fr}.headright{display:none}}
 </style>
 </head>
 <body>
-<header><div class="brand">W10 <b>/</b> LAB</div><div class="headright">PROJECT W10 · SIMULATION BUILD 0.1</div></header>
+<header><div class="brand">W10 <b>/</b> LAB</div><div class="headright">NETWORK SIMULATOR · REVISION 0.2</div></header>
 <main>
-<div class="hero"><div><div class="eyebrow">WIRELESS RESEARCH WORKSPACE</div><h1>Speed is a system.<br><span style="color:var(--mint)">Latency is the test.</span></h1><p class="lead">Explore how bandwidth, spatial streams, signal quality, congestion, and packet scheduling affect a hypothetical next-generation wireless link.</p></div><div class="status">● SIMULATION READY</div></div>
+<div class="hero"><div><div class="eyebrow">WIRELESS RESEARCH WORKSPACE</div><h1>Simulate the network.<br><span style="color:var(--mint)">Stress-test the link.</span></h1><p class="lead">A more realistic educational model with multiple clients, shared airtime, signal-driven retries, background traffic, queueing delay, and a Wi-Fi 7-style baseline beside our proposed W10 scheduling concept.</p></div><div class="pill">● MODEL READY · NO HARDWARE REQUIRED</div></div>
 <section class="metrics">
-<div class="metric"><div class="mlabel">Estimated PHY rate</div><div class="mvalue" id="phy">—</div><div class="msub">Raw link capacity estimate</div></div>
-<div class="metric"><div class="mlabel">Useful throughput</div><div class="mvalue" id="throughput">—</div><div class="msub">Estimated application data</div></div>
-<div class="metric"><div class="mlabel">One-way radio latency</div><div class="mvalue" id="latency">—</div><div class="msub">Model estimate, not internet ping</div></div>
-<div class="metric"><div class="mlabel">Packet loss estimate</div><div class="mvalue" id="loss">—</div><div class="msub">Simplified channel model</div></div>
+<div class="metric"><div class="label">Aggregate goodput</div><div class="value" id="goodput">—</div><div class="sub">Useful payload delivered across clients</div></div>
+<div class="metric"><div class="label">Interactive latency p95</div><div class="value" id="latency">—</div><div class="sub">Modeled one-way local-network delay</div></div>
+<div class="metric"><div class="label">Retry / loss pressure</div><div class="value" id="retry">—</div><div class="sub">Estimated retry share, not internet packet loss</div></div>
+<div class="metric"><div class="label">Airtime utilization</div><div class="value" id="airtime">—</div><div class="sub">Estimated channel occupancy</div></div>
 </section>
 <div class="layout">
 <aside class="panel">
-<div class="ptitle">Radio & environment</div><p class="psub">Change the simulated link conditions.</p>
-<div class="control"><div class="ctop"><label for="bandwidth">Channel bandwidth</label><output id="bandwidthOut">320 MHz</output></div><input id="bandwidth" type="range" min="80" max="1600" step="80" value="320"><div class="ticks"><span>80 MHz</span><span>1600 MHz*</span></div></div>
-<div class="control"><div class="ctop"><label for="streams">Spatial streams</label><output id="streamsOut">4 streams</output></div><input id="streams" type="range" min="1" max="16" step="1" value="4"><div class="ticks"><span>1</span><span>16</span></div></div>
-<div class="control"><div class="ctop"><label for="signal">Signal quality</label><output id="signalOut">90%</output></div><input id="signal" type="range" min="20" max="100" step="5" value="90"><div class="ticks"><span>Weak</span><span>Excellent</span></div></div>
-<div class="control"><div class="ctop"><label for="congestion">Channel congestion</label><output id="congestionOut">15%</output></div><input id="congestion" type="range" min="0" max="90" step="5" value="15"><div class="ticks"><span>Clear</span><span>Busy</span></div></div>
-<div class="control"><label for="modulation" style="font-weight:650">Modulation mode</label><select id="modulation"><option value="10">1024-QAM · robust high speed</option><option value="12" selected>4096-QAM · best signal needed</option><option value="8">256-QAM · more robust</option></select></div>
-<div class="switchrow"><div><strong>W10 deadline scheduling</strong><small>Prioritize latency-sensitive packets</small></div><input class="switch" id="scheduler" type="checkbox" checked aria-label="Enable W10 deadline scheduling"></div>
-<div class="buttons"><button id="reset">Reset defaults</button><button id="randomize">Random test</button></div>
-<div class="note">* Channels wider than 320 MHz are experimental model inputs, not a claim that such Wi-Fi channels are currently standardized or available in your region.</div>
+<div class="ptitle">Network configuration</div><p class="psub">Adjust the access point and the environment.</p>
+<div class="control"><div class="ctop"><label for="bandwidth">Channel bandwidth</label><output id="bandwidthOut">320 MHz</output></div><input id="bandwidth" type="range" min="20" max="320" step="20" value="320"><div class="ticks"><span>20 MHz</span><span>320 MHz</span></div></div>
+<div class="control"><div class="ctop"><label for="streams">AP spatial streams</label><output id="streamsOut">8</output></div><input id="streams" type="range" min="1" max="16" step="1" value="8"><div class="ticks"><span>1</span><span>16</span></div></div>
+<div class="control"><div class="ctop"><label for="clients">Active clients</label><output id="clientsOut">8 devices</output></div><input id="clients" type="range" min="1" max="32" step="1" value="8"><div class="ticks"><span>1 device</span><span>32 devices</span></div></div>
+<div class="control"><div class="ctop"><label for="snr">Typical client SNR</label><output id="snrOut">30 dB</output></div><input id="snr" type="range" min="5" max="40" step="1" value="30"><div class="ticks"><span>5 dB · weak</span><span>40 dB · excellent</span></div></div>
+<div class="control"><div class="ctop"><label for="load">Background traffic</label><output id="loadOut">35%</output></div><input id="load" type="range" min="0" max="100" step="5" value="35"><div class="ticks"><span>None</span><span>Heavy</span></div></div>
+<div class="control"><label for="traffic" style="font-weight:650">Traffic mix</label><select id="traffic"><option value="gaming">Gaming + voice + downloads</option><option value="balanced" selected>Mixed home traffic</option><option value="bulk">Mostly large downloads / uploads</option><option value="video">Video streaming + browsing</option></select></div>
+<div class="control"><label for="band" style="font-weight:650">Radio profile</label><select id="band"><option value="6" selected>6 GHz · wide-channel Wi-Fi</option><option value="5">5 GHz · typical indoor link</option><option value="60">60 GHz · short-range experimental</option></select></div>
+<div class="switchrow"><div><strong>W10 deadline-aware scheduler</strong><small>Prioritize interactive packets under load</small></div><input class="switch" id="scheduler" type="checkbox" checked aria-label="Enable proposed W10 scheduler"></div>
+<div class="buttons"><button id="reset">Reset</button><button id="randomize">Random scenario</button></div>
+<div class="note">This is a mathematical model, not an IEEE-certified simulator. W10 scheduler behavior is a proposed concept. Results are illustrative and should not be presented as measured Wi-Fi 7 or Wi-Fi 10 performance.</div>
 </aside>
-<div class="rightstack">
-<section class="panel"><div class="ptitle">Live performance model</div><p class="psub">Illustrative throughput and latency as channel load changes.</p><div class="chartbox"><canvas id="chart" aria-label="Estimated throughput and latency chart"></canvas></div><div class="chartlegend"><span><i class="dot"></i>Useful throughput</span><span><i class="dot blue"></i>Radio latency</span><span><i class="dot amber"></i>Congestion pressure</span></div>
-<div class="submetrics"><div class="mini"><b id="efficiency">—</b><span>Estimated efficiency</span></div><div class="mini"><b id="headroom">—</b><span>Throughput headroom to 100 Gbps</span></div><div class="mini"><b id="rating">—</b><span>Link assessment</span></div></div></section>
-<section class="panel"><div class="ptitle">Model output</div><p class="psub">What the current settings imply.</p><table class="table"><tbody><tr><th>Metric</th><th>Estimate</th></tr><tr><td>Raw PHY rate</td><td id="tablePhy">—</td></tr><tr><td>Payload efficiency</td><td id="tableEff">—</td></tr><tr><td>Estimated throughput</td><td id="tableThroughput">—</td></tr><tr><td>Idle radio delay</td><td id="idleLatency">—</td></tr><tr><td>Queueing delay under load</td><td id="queueLatency">—</td></tr></tbody></table><p class="psub" style="margin:12px 0 0">This is a deterministic educational model, not a physical-layer simulator or measured hardware benchmark. Real performance depends on RF design, regulations, interference, client capabilities, retransmissions, and protocol implementation.</p></section>
+<div class="stack">
+<section class="panel"><div class="ptitle">Performance under rising load</div><p class="psub">Model sweeps background traffic from idle to saturated. Throughput and latency use separate axes.</p><div class="chartbox"><canvas id="chart" aria-label="Graph comparing throughput and latency at different network loads"></canvas></div><div class="legend"><span><i class="dot"></i>Aggregate goodput</span><span><i class="dot blue"></i>Interactive latency p95</span><span><i class="dot amber"></i>Channel load</span></div>
+<div class="cards"><div class="mini"><b id="phy">—</b><span>Estimated PHY rate, one ideal client</span></div><div class="mini"><b id="perClient">—</b><span>Average goodput per active client</span></div><div class="mini"><b id="mcs">—</b><span>Mode selected by SNR model</span></div></div></section>
+<section class="panel"><div class="ptitle">Baseline comparison</div><p class="psub">Same channel, client count, signal, and offered load. Only the scheduling policy changes.</p>
+<table class="compare"><thead><tr><th>Metric</th><th>Baseline scheduler</th><th>W10 concept</th></tr></thead><tbody>
+<tr><td>Aggregate goodput</td><td id="baseGoodput">—</td><td id="w10Goodput">—</td></tr>
+<tr><td>Interactive latency p50</td><td id="baseP50">—</td><td id="w10P50">—</td></tr>
+<tr><td>Interactive latency p95</td><td id="baseP95">—</td><td id="w10P95">—</td></tr>
+<tr><td>Retry share estimate</td><td id="baseRetry">—</td><td id="w10Retry">—</td></tr>
+</tbody></table>
+<p class="fineprint">The baseline is a simplified conventional contention-and-queueing model, not a bit-for-bit Wi-Fi 7 implementation. W10 can reserve airtime for interactive traffic, so its total goodput may be slightly lower in some cases; the intended gain is lower tail latency during competing bulk traffic.</p></section>
+<section class="panel"><div class="ptitle">Per-client traffic breakdown</div><p class="psub">Illustrative distribution for the current scenario.</p><table class="compare"><thead><tr><th>Traffic class</th><th>Share of offered load</th><th>Estimated delivered rate</th><th>Priority</th></tr></thead><tbody id="trafficRows"></tbody></table><p class="fineprint">A real access point would also depend on client radio capabilities, packet aggregation, channel access, interference, retransmission rules, and vendor-specific scheduling. This page approximates those effects rather than simulating every frame.</p></section>
 </div>
 </div>
-<footer><span>W10 LAB · HYPOTHETICAL STANDARD</span><span><a href="../">← Back to AI / FORGE launcher</a></span></footer>
+<footer><span>W10 LAB · HYPOTHETICAL STANDARD · MODEL REV 0.2</span><span><a href="../">← Back to AI / FORGE launcher</a></span></footer>
 </main>
 <script>
 (function(){
 const $=id=>document.getElementById(id);
-const controls=['bandwidth','streams','signal','congestion','modulation','scheduler'];
-const defaults={bandwidth:320,streams:4,signal:90,congestion:15,modulation:'12',scheduler:true};
-let latest={};
-function fmtRate(n){if(n>=1000)return (n/1000).toFixed(2)+' Tbps';if(n>=100)return n.toFixed(0)+' Gbps';if(n>=10)return n.toFixed(1)+' Gbps';return n.toFixed(2)+' Gbps'}
-function fmtDelay(n){return n<1?n.toFixed(2)+' ms':n.toFixed(1)+' ms'}
-function calculate(){
-const bw=+$('bandwidth').value,streams=+$('streams').value,signal=+$('signal').value,congestion=+$('congestion').value,bits=+$('modulation').value,scheduler=$('scheduler').checked;
-$('bandwidthOut').textContent=bw+' MHz';$('streamsOut').textContent=streams+' streams';$('signalOut').textContent=signal+'%';$('congestionOut').textContent=congestion+'%';
-const signalFactor=.35+.65*Math.pow(signal/100,1.65);
-const modulationFactor=bits/12;
-const phy=bw*streams*bits*.82*.78/1000*signalFactor;
-const efficiency=.78*(1-congestion/100*.22)*(signal<50?.82:1);
-const throughput=Math.max(0,phy*efficiency);
-const loss=Math.max(.01,Math.pow((100-signal)/100,2)*1.8+congestion/100*.45);
-const idle=.18+(bw/1600)*.11+(streams/16)*.07+(100-signal)*.004;
-const queueBase=Math.pow(congestion/100,2)*5.8+(throughput>0?Math.min(2,2/Math.max(throughput,0.1)):2);
-const queue=scheduler?queueBase*.22:queueBase*1.6;
-const latency=idle+queue;
-const eff=throughput/Math.max(phy,.001)*100;
-$('phy').textContent=fmtRate(phy);$('throughput').textContent=fmtRate(throughput);$('latency').textContent=fmtDelay(latency);$('loss').textContent=loss.toFixed(2)+'%';
-$('efficiency').textContent=eff.toFixed(0)+'%';$('headroom').textContent=Math.max(0,100-throughput).toFixed(1)+' Gbps';$('rating').textContent=signal>75&&congestion<25&&latency<1?'Excellent':signal>50&&congestion<55?'Usable':'Challenged';
-$('tablePhy').textContent=fmtRate(phy);$('tableEff').textContent=eff.toFixed(1)+'%';$('tableThroughput').textContent=fmtRate(throughput);$('idleLatency').textContent=fmtDelay(idle);$('queueLatency').textContent=fmtDelay(queue);
-latest={bw,streams,signal,congestion,bits,scheduler,phy,throughput,latency,loss,eff,idle,queue};drawChart();
+const ids=['bandwidth','streams','clients','snr','load','traffic','band','scheduler'];
+const defaults={bandwidth:320,streams:8,clients:8,snr:30,load:35,traffic:'balanced',band:'6',scheduler:true};
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+const rate=n=>n>=1000?(n/1000).toFixed(2)+' Tbps':n>=10?n.toFixed(1)+' Gbps':n.toFixed(2)+' Gbps';
+const delay=n=>n<1?n.toFixed(2)+' ms':n.toFixed(1)+' ms';
+let current=null;
+function mcsFor(snr){if(snr<8)return {name:'BPSK/QPSK',eff:.8};if(snr<12)return {name:'16-QAM',eff:1.8};if(snr<17)return {name:'64-QAM',eff:3.5};if(snr<22)return {name:'256-QAM',eff:5.2};if(snr<28)return {name:'1024-QAM',eff:6.8};if(snr<34)return {name:'4096-QAM',eff:8.0};return {name:'4096-QAM+',eff:8.6};}
+function simulate(load, scheduler){
+const bw=+$('bandwidth').value,streams=+$('streams').value,clients=+$('clients').value,snr=+$('snr').value,band=$('band').value,traffic=$('traffic').value;
+const mcs=mcsFor(snr);
+const bandFactor=band==='60'?(snr<25?.62:.92):band==='5'?.88:1;
+const clientStreams=Math.min(streams,Math.max(1,Math.ceil(streams/Math.min(clients,streams))));
+const phy=bw*mcs.eff*streams*bandFactor/1000;
+const clientPhy=bw*mcs.eff*clientStreams*bandFactor/1000;
+const spectralPenalty=snr<12?.52:snr<18?.72:snr<24?.86:1;
+const retry=clamp(.025+Math.pow(Math.max(0,28-snr)/28,2)*.38+load/100*.035+(clients-1)*.002, .02,.62);
+const collision=clamp(.015+(clients-1)*.009+load/100*.13,0,.58);
+const retransmissionCost=1/(1+retry*1.8+collision*.7);
+const protocolEfficiency=band==='60'?.68:.72;
+const rawGoodput=phy*protocolEfficiency*spectralPenalty*retransmissionCost*(1-load/100*.12);
+const saturation=clamp(load/100*.88+(clients/32)*.08,0,.97);
+const queuePressure=saturation/(1-saturation);
+const bulkFactor=traffic==='bulk'?1.12:traffic==='gaming'?.88:traffic==='video'?.96;
+const offered=rawGoodput*clamp((.22+load/100*.98)*bulkFactor,.08,1.08);
+const actual=Math.max(0,Math.min(rawGoodput,offered));
+const idle=.22+(bw/320)*.09+(band==='60'?.22:0)+(100-snr)*.006;
+const contention=clients*(.035+collision*.14)+(load/100)*.22;
+const queueBase=queuePressure*(traffic==='gaming'?.65:traffic==='bulk'?1.35:1.0)*Math.min(3.8, .35+clients*.12);
+const baselineP50=idle+contention+queueBase*.32;
+const baselineP95=idle+contention+queueBase*1.65+(retry*2.2);
+const w10Queue=queueBase*(traffic==='gaming'?.14:.25);
+const w10P50=idle+contention*.72+w10Queue*.32+retry*.25;
+const w10P95=idle+contention*.60+w10Queue*1.1+retry*.45;
+const baseGoodput=Math.max(0,actual*(1-(scheduler?0:.015)));
+const w10Goodput=Math.max(0,actual*(scheduler?(traffic==='gaming'?.985:.97):1));
+const p50=scheduler?w10P50:baselineP50,p95=scheduler?w10P95:baselineP95;
+return {bw,streams,clients,snr,band,traffic,load,scheduler,mcs,phy,clientPhy,goodput:actual,baseGoodput,w10Goodput,retry,collision,p50,p95,baselineP50,baselineP95,w10P50,w10P95,airtime:clamp((actual/Math.max(rawGoodput,.001))*saturation*100+collision*18,0,100),rawGoodput};
+}
+function render(){
+const v=simulate(+$('load').value,$('scheduler').checked);current=v;
+$('bandwidthOut').textContent=v.bw+' MHz';$('streamsOut').textContent=v.streams+' streams';$('clientsOut').textContent=v.clients+' devices';$('snrOut').textContent=v.snr+' dB';$('loadOut').textContent=v.load+'%';
+$('goodput').textContent=rate(v.goodput);$('latency').textContent=delay(v.p95);$('retry').textContent=(v.retry*100).toFixed(1)+'%';$('airtime').textContent=v.airtime.toFixed(0)+'%';
+$('phy').textContent=rate(v.phy);$('perClient').textContent=rate(v.goodput/Math.max(1,v.clients));$('mcs').textContent=v.mcs.name;
+$('baseGoodput').textContent=rate(v.baseGoodput);$('w10Goodput').textContent=rate(v.w10Goodput);
+$('baseP50').textContent=delay(v.baselineP50);$('w10P50').textContent=delay(v.w10P50);$('baseP95').textContent=delay(v.baselineP95);$('w10P95').textContent=delay(v.w10P95);
+$('baseRetry').textContent=(v.retry*100).toFixed(1)+'%';$('w10Retry').textContent=(v.retry*100).toFixed(1)+'%';
+const classes=v.traffic==='gaming'?[['Game / voice',.18,'Highest'],['Video / web',.22,'Normal'],['Bulk transfers',.60,'Background']]:v.traffic==='bulk'?[['Interactive',.04,'High'],['Web / video',.16,'Normal'],['Bulk transfers',.80,'Background']]:v.traffic==='video'?[['Interactive',.08,'High'],['Video streams',.72,'Normal'],['Web / background',.20,'Normal']]:[['Interactive',.10,'High'],['Video / web',.45,'Normal'],['Bulk transfers',.45,'Background']];
+$('trafficRows').innerHTML=classes.map(c=>'<tr><td>'+c[0]+'</td><td>'+(c[1]*100).toFixed(0)+'%</td><td>'+rate(v.goodput*c[1])+'</td><td>'+c[2]+'</td></tr>').join('');
+drawChart();
 }
 function drawChart(){
-const c=$('chart'),rect=c.getBoundingClientRect(),dpr=window.devicePixelRatio||1;if(!rect.width||!rect.height)return;
-c.width=Math.round(rect.width*dpr);c.height=Math.round(rect.height*dpr);const x=c.getContext('2d');x.scale(dpr,dpr);
-const w=rect.width,h=rect.height,p={l:38,r:12,t:12,b:25},cw=w-p.l-p.r,ch=h-p.t-p.b;
-x.clearRect(0,0,w,h);x.font='10px system-ui';x.strokeStyle='#263448';x.fillStyle='#91a0b5';x.lineWidth=1;
-for(let i=0;i<=4;i++){const y=p.t+ch*i/4;x.beginPath();x.moveTo(p.l,y);x.lineTo(w-p.r,y);x.stroke();x.fillText((100-i*25)+'%',2,y+3)}
-const points=[];for(let i=0;i<=20;i++){const load=i*4.5;const t=latest.phy*.78*(1-load/100*.22);const q=latest.scheduler?Math.pow(load/100,2)*1.3:Math.pow(load/100,2)*8.5;points.push({load,t,lat:latest.idle+q})}
-const maxT=Math.max(latest.phy,1),maxL=10;
-function line(key,color,max,dash){x.beginPath();x.strokeStyle=color;x.lineWidth=2;x.setLineDash(dash||[]);points.forEach((a,i)=>{const px=p.l+cw*i/(points.length-1),val=Math.min(max,a[key]),py=p.t+ch*(1-val/max);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();x.setLineDash([])}
-line('t','#71e4c1',maxT);line('lat','#79a9ff',maxL,[4,3]);
-x.fillStyle='#ffca78';x.globalAlpha=.7;for(let i=0;i<points.length;i+=2){const a=points[i],px=p.l+cw*i/(points.length-1),bar=p.t+ch*(1-a.load/100);x.fillRect(px-1,bar,3,p.t+ch-bar)}x.globalAlpha=1;
-x.fillStyle='#91a0b5';x.fillText('0% load',p.l,h-5);x.fillText('90% load',w-66,h-5);
+const c=$('chart'),r=c.getBoundingClientRect(),dpr=window.devicePixelRatio||1;if(!r.width||!r.height)return;c.width=Math.round(r.width*dpr);c.height=Math.round(r.height*dpr);const x=c.getContext('2d');x.scale(dpr,dpr);const w=r.width,h=r.height,p={l:42,r:12,t:14,b:27},cw=w-p.l-p.r,ch=h-p.t-p.b;x.clearRect(0,0,w,h);
+const loads=Array.from({length:11},(_,i)=>i*10),series=loads.map(load=>simulate(load,$('scheduler').checked));const maxT=Math.max(...series.map(s=>s.goodput),.1)*1.12;const maxL=Math.max(...series.map(s=>s.baselineP95),...series.map(s=>s.w10P95),1)*1.12;
+x.font='10px system-ui';x.strokeStyle='#263448';x.fillStyle='#91a0b5';for(let i=0;i<=4;i++){let y=p.t+ch*i/4;x.beginPath();x.moveTo(p.l,y);x.lineTo(w-p.r,y);x.stroke();x.fillText((maxT*(1-i/4)).toFixed(1),2,y+3)}
+x.fillStyle='#ffca78';series.forEach((s,i)=>{let xx=p.l+cw*i/10;let bh=ch*s.load/100*.35;x.globalAlpha=.45;x.fillRect(xx-2,p.t+ch-bh,4,bh)});x.globalAlpha=1;
+function line(key,color,max,dash){x.beginPath();x.strokeStyle=color;x.lineWidth=2;x.setLineDash(dash||[]);series.forEach((s,i)=>{const xx=p.l+cw*i/10, val=key==='lat'?( $('scheduler').checked?s.w10P95:s.baselineP95):s.goodput;const scaled=key==='lat'?val/maxL:val/maxT;const yy=p.t+ch*(1-clamp(scaled,0,1));i?x.lineTo(xx,yy):x.moveTo(xx,yy)});x.stroke();x.setLineDash([])}
+line('throughput','#71e4c1',maxT);line('lat','#79a9ff',maxL,[4,3]);x.fillStyle='#91a0b5';x.fillText('0% load',p.l,h-5);x.fillText('100% load',w-64,h-5);
 }
-controls.forEach(id=>$(id).addEventListener(id==='scheduler'?'change':'input',calculate));
-$('reset').addEventListener('click',()=>{Object.keys(defaults).forEach(id=>{if(id==='scheduler')$(id).checked=defaults[id];else $(id).value=defaults[id]});calculate()});
-$('randomize').addEventListener('click',()=>{$('bandwidth').value=[160,320,640,960,1280,1600][Math.floor(Math.random()*6)];$('streams').value=1+Math.floor(Math.random()*16);$('signal').value=20+Math.floor(Math.random()*17)*5;$('congestion').value=Math.floor(Math.random()*19)*5;$('modulation').value=['8','10','12'][Math.floor(Math.random()*3)];$('scheduler').checked=Math.random()>.3;calculate()});
-window.addEventListener('resize',drawChart);calculate();
+ids.forEach(id=>$(id).addEventListener(id==='scheduler'||id==='traffic'||id==='band'?'change':'input',render));
+$('reset').addEventListener('click',()=>{Object.keys(defaults).forEach(id=>{if(id==='scheduler')$(id).checked=defaults[id];else $(id).value=defaults[id]});render()});
+$('randomize').addEventListener('click',()=>{$('bandwidth').value=[20,40,80,160,240,320][Math.floor(Math.random()*6)];$('streams').value=1+Math.floor(Math.random()*16);$('clients').value=1+Math.floor(Math.random()*32);$('snr').value=5+Math.floor(Math.random()*36);$('load').value=Math.floor(Math.random()*21)*5;$('traffic').value=['gaming','balanced','bulk','video'][Math.floor(Math.random()*4)];$('band').value=['5','6','60'][Math.floor(Math.random()*3)];$('scheduler').checked=Math.random()>.5;render()});
+window.addEventListener('resize',drawChart);render();
 })();
 </script>
-</body>
-</html>
+</body></html>
