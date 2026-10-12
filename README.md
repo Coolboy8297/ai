@@ -1,31 +1,39 @@
 # COMMAND AI
 
-COMMAND AI is a modular local AI assistant UI for Ollama. GitHub hosts the source; run the companion on your Debian/Linux computer for local model access and approved tools.
+A public, browser-based AI assistant hosted on GitHub Pages. It runs an open-weight language model on the visitor's own device using WebGPU—no Ollama, Python, account, API key, or personal server required.
 
-## Quick start (Debian/Linux)
+## Use the website
 
-1. Make sure Ollama is installed and a model is downloaded, for example `ollama pull qwen2.5:1.5b`.
-2. Open a terminal in this repository folder.
-3. Run `chmod +x start.sh && ./start.sh`.
-4. Open **http://127.0.0.1:8765** in your browser.
-5. Press Connect, choose a model, then enable Agent mode for tool use.
+1. Open the published GitHub Pages URL.
+2. Choose the smaller Qwen 2.5 0.5B model to start, or try the 1.5B model if your device has enough memory.
+3. Press **Load AI model** and wait for the model to download and initialize.
+4. Start chatting. The browser may cache the model for later visits.
 
-The companion uses Python's standard library; no pip packages or virtual environment are required. It proxies requests to Ollama and serves the UI on localhost, avoiding the common GitHub Pages-to-local-Ollama CORS problem. Set `OLLAMA_HOST` or `COMMAND_AI_PORT` environment variables to customize the endpoints.
+The first model download can be hundreds of megabytes or more. A compatible browser with WebGPU and sufficient available memory is required; performance depends on the visitor's device. The model runs on-device after download, so prompts are not sent to a COMMAND AI inference server.
 
-## Current capabilities
+## Built-in modules
 
-- Chat with installed local Ollama models; image attachments and one-shot webcam capture work with vision-capable models.
-- Agent mode: the model can request bounded tools and use their results in a short tool loop.
-- Tools: system information, local Ollama model list, list files in the home folder, read small text files in the home folder, and a strict safe-command allowlist (`pwd`, `whoami`, `date`, `uname -a`, `df -h`, `free -h`, `uptime`, `python --version`, `ollama list`, `git status`).
-- `/time`, `/models`, `/clear`, and `open https://example.com`.
-- No third-party dependencies.
+- Local browser inference through WebLLM/WebGPU.
+- Bounded agent loop for tool requests.
+- Calculator with arithmetic-only input validation.
+- Current local time and timezone.
+- Open a requested HTTP/HTTPS website in a new tab.
+- Read text files only after the visitor explicitly selects them; files are limited in size.
+- Conversation history for the current page session and clear-chat control.
 
-## Safety and limitations
+## Important limits
 
-This is intentionally **not** unrestricted remote shell access. The companion binds only to `127.0.0.1`, restricts file access to your home folder, only reads files, and only runs exact allowlisted commands. It does not install software, delete files, modify system settings, control other apps, continuously monitor the webcam, or perform background surveillance. Those features would require additional explicit permission and separate implementation.
+This is a static GitHub Pages app, not a remote computer-control service. It cannot access a visitor's private filesystem without a file picker, execute shell commands, control other apps, or run Ollama on the website's server. Image vision and live webcam analysis are not currently implemented in the browser version. There is no hosted cloud-model fallback, so browsers without WebGPU or devices without enough memory cannot run the included models yet.
 
-Images are sent to the selected local Ollama model. Webcam use requires browser permission and is only started after pressing the camera button. Conversation content stays in browser memory unless you choose to send it to the local model. Do not expose the companion or Ollama ports to the public internet.
+The web app imports WebLLM from `https://esm.run/@mlc-ai/web-llm` and downloads model artifacts when requested. Those third-party assets are necessary for browser inference.
 
-## GitHub Pages
+## Deploy to GitHub Pages
 
-The Pages site can host the static UI, but for best results use the local companion at `http://127.0.0.1:8765`. Enable **Settings → Pages → Build and deployment → GitHub Actions** to publish the static site. GitHub Pages cannot itself host the Python companion process.
+In the repository, open **Settings → Pages → Build and deployment** and choose **GitHub Actions** as the source. The workflow in `.github/workflows/pages.yml` then publishes the static site on pushes to `main`.
+
+Expected site address: https://coolboy8297.github.io/ai/
+
+## Project layout
+
+- `index.html` — complete public browser app.
+- `.github/workflows/pages.yml` — static GitHub Pages deployment.
