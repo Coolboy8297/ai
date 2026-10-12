@@ -15,7 +15,7 @@ main{width:min(1080px,100%);margin:auto;padding:clamp(34px,7vw,78px) 20px 44px}
 .eyebrow{color:var(--mint);font-size:11px;letter-spacing:.2em;font-weight:800}
 h1{font-size:clamp(38px,7vw,72px);line-height:1.02;letter-spacing:-.045em;margin:12px 0 16px}h1 span{color:var(--mint)}
 .lead{max-width:620px;color:var(--muted);font-size:16px;margin:0 0 36px}
-.apps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
 .app{position:relative;display:flex;flex-direction:column;min-height:330px;padding:26px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#141e2b,#0d131d 75%);text-decoration:none;color:inherit;overflow:hidden;transition:transform .18s,border-color .18s,background .18s}
 .app:hover,.app:focus-visible{transform:translateY(-4px);border-color:var(--mint);background:linear-gradient(145deg,#192a37,#0d131d 75%);outline:none}
 .app.forge:hover,.app.forge:focus-visible{border-color:var(--blue)}
@@ -48,6 +48,13 @@ footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:
 <h2>FORGE Game Engine</h2>
 <p class="desc">Open the 3D editor to build scenes, arrange objects, and work on your game projects.</p>
 <div class="launch"><span>Launch FORGE</span><span class="arrow" aria-hidden="true">↗</span></div>
+</a>
+<a class="app" href="./wifi-lab/" style="border-color:#31564d">
+<div class="glyph" aria-hidden="true" style="color:var(--mint);border-color:#365044;background:#12251f">⌁</div>
+<div class="tag">WIRELESS RESEARCH</div>
+<h2>W10 Wi-Fi Lab</h2>
+<p class="desc">Simulate throughput, radio latency, channel congestion, signal quality, and the proposed Wi-Fi 10 scheduling system.</p>
+<div class="launch"><span>Launch W10 Lab</span><span class="arrow" aria-hidden="true">↗</span></div>
 </a>
 </section>
 <footer><span>AI / FORGE LAUNCHER</span><span>Choose a project to continue.</span></footer>
