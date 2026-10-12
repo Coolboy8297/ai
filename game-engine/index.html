@@ -65,6 +65,7 @@ const objects=[],pickables=[],assets=[],loader=new GLTFLoader(),raycaster=new TH
 let forgeWorld={time:12,timeSpeed:1,weather:'clear',wind:0,quality:'balanced',sculptMode:'raise',sculptRadius:3,sculptStrength:.6,paintMode:false,paintColor:'#477a42'};
 let forgeSculptEnabled=false;
 let forgeGameState={inventory:[],quests:{},checkpoint:[0,0,3],lastInteract:0};
+let forgeSun=null,forgeHemisphere=null,forgeWeatherPoints=null,forgeWeatherVelocities=[];
 const projectName=$('#projectName');
 function showToast(text){const t=$('#toast');t.textContent=text;t.style.display='block';setTimeout(()=>t.style.display='none',2300);}
 function closeMenus(){document.querySelectorAll('.dropdown.open').forEach(e=>e.classList.remove('open'));}
