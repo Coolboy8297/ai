@@ -80,7 +80,9 @@ function setup(){
  const grid=new THREE.GridHelper(100,100,0x426078,0x273747);grid.position.y=.003;scene.add(grid);
  const axes=new THREE.AxesHelper(1.5);axes.position.y=.02;scene.add(axes);
  gizmo=new TransformControls(camera,renderer.domElement);const gizmoRoot=typeof gizmo.getHelper==='function'?gizmo.getHelper():gizmo;scene.add(gizmoRoot);gizmo.addEventListener('dragging-changed',e=>orbit.enabled=!e.value&&!playing);gizmo.addEventListener('objectChange',()=>{if(selected)renderInspector()});gizmo.addEventListener('mouseUp',recordHistory);
- renderer.domElement.addEventListener('pointerdown',pickObject);
+ renderer.domElement.addEventListener('pointerdown',e=>{if(forgeSculptEnabled||forgeWorld.paintMode){e.preventDefault();e.stopImmediatePropagation();forgeTerrainBrush(e);orbit.enabled=false;}else pickObject(e);});
+ renderer.domElement.addEventListener('pointermove',e=>{if((forgeSculptEnabled||forgeWorld.paintMode)&&e.buttons===1)forgeTerrainBrush(e);});
+ window.addEventListener('pointerup',()=>{if(orbit)orbit.enabled=!playing;});
  window.addEventListener('resize',resize);new ResizeObserver(resize).observe(viewport);
 }
 function addObject(type,opts={}){
@@ -461,9 +463,6 @@ function bindStudio(){
  on('saveNow',saveScene);on('loadLast',()=>{try{const d=JSON.parse(localStorage.getItem('forge-scene'));loadSceneData(d);showToast('Browser save restored');}catch(e){showToast('No valid browser save found');}});
  on('exportSettings',()=>downloadBlob(new Blob([JSON.stringify({project:projectName.value,graphics:{shadows:renderer.shadowMap.enabled,toneMapping:renderer.toneMapping,exposure:renderer.toneMappingExposure}},null,2)],{type:'application/json'}),'forge-settings.json'));
 }
-renderer.domElement.addEventListener('pointerdown',e=>{if(forgeSculptEnabled||forgeWorld.paintMode){e.preventDefault();forgeTerrainBrush(e);if(orbit)orbit.enabled=false;}});
-renderer.domElement.addEventListener('pointermove',e=>{if((forgeSculptEnabled||forgeWorld.paintMode)&&e.buttons===1)forgeTerrainBrush(e);});
-window.addEventListener('pointerup',()=>{if(orbit)orbit.enabled=true;});
 document.addEventListener('keydown',e=>{if(e.code==='KeyE'&&playing&&!e.repeat){e.preventDefault();forgeInteractNearest();}});
 function renderKeyList(){const e=$('#keyList');if(!e)return;const k=selected?.userData.keyframes||[];e.innerHTML=k.length?k.map((x,i)=>'<div class="studio-pill">Key '+(i+1)+' · '+x.time+'s <button data-delkey="'+i+'">×</button></div>').join(''):'<p>No keyframes yet.</p>';e.querySelectorAll('[data-delkey]').forEach(b=>b.onclick=()=>{selected.userData.keyframes.splice(+b.dataset.delkey,1);renderKeyList();recordHistory();});const rail=$('#timelineRail');if(rail){rail.innerHTML='';k.forEach(x=>{const m=document.createElement('i');m.style.cssText='position:absolute;top:2px;bottom:2px;width:6px;background:var(--accent);border-radius:2px;left:'+Math.min(98,x.time/Math.max(1,...k.map(q=>q.time))*100)+'%';rail.appendChild(m);});}}
 function renderPrefabList(){const e=$('#prefabList');if(!e)return;const names=Object.keys(studioPrefabs);e.innerHTML=names.length?names.map(n=>'<button data-spawnprefab="'+esc(n)+'">'+esc(n)+'</button>').join(''):'<p>No saved prefabs yet.</p>';e.querySelectorAll('[data-spawnprefab]').forEach(b=>b.onclick=()=>{const d=studioPrefabs[b.dataset.spawnprefab],o=addObject(d.type,{...d,name:b.dataset.spawnprefab+' Instance'});if(o)select(o);});}
