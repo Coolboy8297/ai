@@ -211,7 +211,7 @@ function terrainSurfaceY(terrain,x,z){const amp=terrain.userData.terrainAmplitud
 function populateTerrain(terrain,seed=Date.now()){
   if(!terrain||terrain.userData.foliageBuilt)return;
   const size=terrain.userData.terrainSize||40,rng=seededRandom(seed),half=size*.47;
-  terrain.userData.foliageBuilt=true;terrain.userData.foliageEnabled=true;terrain.userData.foliageSeed=seed;terrain.userData.treeCount=22;terrain.userData.grassCount=650;
+  terrain.userData.foliageBuilt=true;terrain.userData.foliageEnabled=true;terrain.userData.foliageSeed=seed;terrain.userData.treeCount=terrain.userData._forgeTreeCount||16;terrain.userData.grassCount=terrain.userData._forgeGrassCount||400;
   const trunkMat=new THREE.MeshStandardMaterial({color:'#60402a',roughness:1});
   const leafMats=['#285c32','#326b38','#3c7840'].map(color=>new THREE.MeshStandardMaterial({color,roughness:.95}));
   for(let i=0;i<terrain.userData.treeCount;i++){
@@ -244,7 +244,7 @@ function animateTerrainGrass(){
     if(!blades||!grass||!terrain.visible)continue;
     terrain.updateWorldMatrix(true,false);
     const localPlayer=terrain.worldToLocal(playerPos.clone());
-    for(let i=0;i<blades.length;i++){
+    for(let i=0;i<Math.min(blades.length,grass.count);i++){
       const b=blades[i],dx=b.x-localPlayer.x,dz=b.z-localPlayer.z,dist=Math.hypot(dx,dz);
       const influence=THREE.MathUtils.clamp((1.35-dist)/1.05,0,1),bend=influence*.95;
       const sway=Math.sin(performance.now()*.0018+b.phase)*.035;
@@ -254,7 +254,7 @@ function animateTerrainGrass(){
   }
 }
 function groundHeightAt(x,z){let height=0;for(const o of objects){if(!o.visible)continue;if(o.userData.type==='Plane'){height=Math.max(height,new THREE.Box3().setFromObject(o).max.y);}}const terrainMeshes=objects.filter(o=>o.visible&&o.userData.type==='Terrain'&&o.isMesh);if(terrainMeshes.length){const ray=new THREE.Raycaster(new THREE.Vector3(x,1000,z),new THREE.Vector3(0,-1,0),0,2000);const hits=ray.intersectObjects(terrainMeshes,false);if(hits.length)height=Math.max(height,hits[0].point.y);}return height;}
-function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-lastTime)/1000,.05);lastTime=now;if(orbit&&orbit.enabled)orbit.update();if(playing){if(playPlayer){const ctrl=playPlayer.userData.controller||{height:1.8,radius:.32,walkSpeed:5,sprintSpeed:8,jumpSpeed:6,gravity:18};const speed=(moveKeys.ShiftLeft||moveKeys.ShiftRight)?ctrl.sprintSpeed:ctrl.walkSpeed;const forward=new THREE.Vector3(-Math.sin(playYaw),0,-Math.cos(playYaw));const right=new THREE.Vector3(Math.cos(playYaw),0,-Math.sin(playYaw));const wish=new THREE.Vector3();if(moveKeys.KeyW)wish.add(forward);if(moveKeys.KeyS)wish.sub(forward);if(moveKeys.KeyD)wish.add(right);if(moveKeys.KeyA)wish.sub(right);if(wish.lengthSq()>0)wish.normalize().multiplyScalar(speed*dt);const old=playPlayer.position.clone();const ground=groundHeightAt(playPlayer.position.x,playPlayer.position.z);const canMove=(x,z)=>{const feetY=playPlayer.position.y;const bodyBox=new THREE.Box3(new THREE.Vector3(x-ctrl.radius,feetY+.08,z-ctrl.radius),new THREE.Vector3(x+ctrl.radius,feetY+ctrl.height,z+ctrl.radius));for(const other of objects){if(other===playPlayer||!other.visible||['Plane','Terrain','Player','Point Light','Camera'].includes(other.userData.type))continue;const box=new THREE.Box3().setFromObject(other);if(bodyBox.intersectsBox(box))return false;}return true;};const nx=old.x+wish.x,nz=old.z+wish.z;if(canMove(nx,old.z))playPlayer.position.x=nx;if(canMove(playPlayer.position.x,nz))playPlayer.position.z=nz;if(moveKeys.Space&&playGrounded){playVerticalVelocity=ctrl.jumpSpeed;playGrounded=false;}playVerticalVelocity-=ctrl.gravity*dt;playPlayer.position.y+=playVerticalVelocity*dt;if(playPlayer.position.y<=ground){playPlayer.position.y=ground;playVerticalVelocity=0;playGrounded=true;}camera.position.set(playPlayer.position.x,playPlayer.position.y+1.58,playPlayer.position.z);camera.rotation.order='YXZ';camera.rotation.set(playPitch,playYaw,0);}for(const o of objects){if(o.userData.type==='Particles'&&o.userData.particleEmitter&&playing){const p=o.userData.particleEmitter,attr=o.geometry.getAttribute('position');for(let i=0;i<p.count;i++){const v=p.velocities[i];v.age+=dt;if(v.age>=p.lifetime){v.age=0;attr.setXYZ(i,(Math.random()-.5)*p.spread,0,(Math.random()-.5)*p.spread);v.x=(Math.random()-.5)*.7;v.y=.6+Math.random()*1.8;v.z=(Math.random()-.5)*.7;}else attr.setXYZ(i,attr.getX(i)+v.x*p.speed*dt,attr.getY(i)+v.y*p.speed*dt,attr.getZ(i)+v.z*p.speed*dt);}attr.needsUpdate=true;}runComponents(o,dt);if(!o.userData.script)continue;try{if(!o.userData._runtimeScript||o.userData._runtimeSource!==o.userData.script){o.userData._runtimeScript=new Function('THREE','return (function(){'+o.userData.script+';return typeof update==="function"?update:null})()')(THREE);o.userData._runtimeSource=o.userData.script;}o.userData._runtimeScript?.(dt,o,{scene,camera,THREE,playMode:true,log});}catch(err){if(o.userData._lastScriptError!==err.message){log('Script error in '+o.name+': '+err.message,'error');o.userData._lastScriptError=err.message;}}}}animateTerrainGrass();animateStudioObjects(dt);if(selectionOutline&&selected)updateSelectionOutline();renderer.render(scene,camera);frameCount++;fpsFrames++;if(fpsFrames>=30){$('#fps').textContent=Math.round(fpsFrames/Math.max((now-(window._fpsStart||now))/1000,.01))+' FPS';window._fpsStart=now;fpsFrames=0;}}
+function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-lastTime)/1000,.05);lastTime=now;if(orbit&&orbit.enabled)orbit.update();if(playing){if(playPlayer){const ctrl=playPlayer.userData.controller||{height:1.8,radius:.32,walkSpeed:5,sprintSpeed:8,jumpSpeed:6,gravity:18};const speed=(moveKeys.ShiftLeft||moveKeys.ShiftRight)?ctrl.sprintSpeed:ctrl.walkSpeed;const forward=new THREE.Vector3(-Math.sin(playYaw),0,-Math.cos(playYaw));const right=new THREE.Vector3(Math.cos(playYaw),0,-Math.sin(playYaw));const wish=new THREE.Vector3();if(moveKeys.KeyW)wish.add(forward);if(moveKeys.KeyS)wish.sub(forward);if(moveKeys.KeyD)wish.add(right);if(moveKeys.KeyA)wish.sub(right);if(wish.lengthSq()>0)wish.normalize().multiplyScalar(speed*dt);const old=playPlayer.position.clone();const ground=groundHeightAt(playPlayer.position.x,playPlayer.position.z);const canMove=(x,z)=>{const feetY=playPlayer.position.y;const bodyBox=new THREE.Box3(new THREE.Vector3(x-ctrl.radius,feetY+.08,z-ctrl.radius),new THREE.Vector3(x+ctrl.radius,feetY+ctrl.height,z+ctrl.radius));for(const other of objects){if(other===playPlayer||!other.visible||['Plane','Terrain','Player','Point Light','Camera'].includes(other.userData.type))continue;const box=new THREE.Box3().setFromObject(other);if(bodyBox.intersectsBox(box))return false;}return true;};const nx=old.x+wish.x,nz=old.z+wish.z;if(canMove(nx,old.z))playPlayer.position.x=nx;if(canMove(playPlayer.position.x,nz))playPlayer.position.z=nz;if(moveKeys.Space&&playGrounded){playVerticalVelocity=ctrl.jumpSpeed;playGrounded=false;}playVerticalVelocity-=ctrl.gravity*dt;playPlayer.position.y+=playVerticalVelocity*dt;if(playPlayer.position.y<=ground){playPlayer.position.y=ground;playVerticalVelocity=0;playGrounded=true;}camera.position.set(playPlayer.position.x,playPlayer.position.y+1.58,playPlayer.position.z);camera.rotation.order='YXZ';camera.rotation.set(playPitch,playYaw,0);}for(const o of objects){if(o.userData.type==='Particles'&&o.userData.particleEmitter&&playing){const p=o.userData.particleEmitter,attr=o.geometry.getAttribute('position');for(let i=0;i<p.count;i++){const v=p.velocities[i];v.age+=dt;if(v.age>=p.lifetime){v.age=0;attr.setXYZ(i,(Math.random()-.5)*p.spread,0,(Math.random()-.5)*p.spread);v.x=(Math.random()-.5)*.7;v.y=.6+Math.random()*1.8;v.z=(Math.random()-.5)*.7;}else attr.setXYZ(i,attr.getX(i)+v.x*p.speed*dt,attr.getY(i)+v.y*p.speed*dt,attr.getZ(i)+v.z*p.speed*dt);}attr.needsUpdate=true;}runComponents(o,dt);if(!o.userData.script)continue;try{if(!o.userData._runtimeScript||o.userData._runtimeSource!==o.userData.script){o.userData._runtimeScript=new Function('THREE','return (function(){'+o.userData.script+';return typeof update==="function"?update:null})()')(THREE);o.userData._runtimeSource=o.userData.script;}o.userData._runtimeScript?.(dt,o,{scene,camera,THREE,playMode:true,log});}catch(err){if(o.userData._lastScriptError!==err.message){log('Script error in '+o.name+': '+err.message,'error');o.userData._lastScriptError=err.message;}}}}animateTerrainGrass();animateWorldSimulation(dt);animateStudioObjects(dt);if(selectionOutline&&selected)updateSelectionOutline();renderer.render(scene,camera);frameCount++;fpsFrames++;if(fpsFrames>=30){$('#fps').textContent=Math.round(fpsFrames/Math.max((now-(window._fpsStart||now))/1000,.01))+' FPS';window._fpsStart=now;fpsFrames=0;}}
 function startup(){setup();window._fpsStart=performance.now();let restored=false;try{const saved=localStorage.getItem('forge-scene');if(saved){const d=JSON.parse(saved);if(d.format==='FORGE_SCENE'&&Array.isArray(d.objects)){if(d.projectName)projectName.value=d.projectName;for(const item of d.objects)addObject(item.type,{...item});restored=objects.length>0;}}}catch(e){log('Could not restore saved scene: '+e.message,'warn');}if(!restored){addObject('Plane',{name:'Ground'});addObject('Box',{name:'Cube'});addObject('Player',{name:'Player'});const player=objects.find(o=>o.userData.type==='Player');if(player)player.position.set(0,0,3);addObject('Point Light',{name:'Key Light'});addObject('Camera',{name:'Scene Camera'});}select(null);renderAssets();recordHistory();log('FORGE initialized. Three.js renderer ready.');animate(performance.now());}
 
 /* Studio feature suite: terrain, materials, timeline, visual logic, AI, graphics, assets, scenes and export */
@@ -265,6 +265,104 @@ $('#studioBtn').onclick=()=>studioOpen();$('#studioClose').onclick=studioClose;
 $('#studioTabs').addEventListener('click',e=>{const b=e.target.closest('[data-stab]');if(b){studioTab=b.dataset.stab;renderStudio();}});
 function studioCard(title,html,wide=false){return '<section class="studio-card'+(wide?' studio-wide':'')+'"><h3>'+title+'</h3>'+html+'</section>';}
 function studioRow(label,control){return '<div class="studio-row"><label>'+label+'</label>'+control+'</div>';}
+
+function forgeNotice(message){
+ let hud=document.getElementById('forgeRuntimeNotice');
+ if(!hud){hud=document.createElement('div');hud.id='forgeRuntimeNotice';hud.style.cssText='position:fixed;left:50%;bottom:7%;transform:translateX(-50%);z-index:10000;max-width:min(620px,90vw);padding:14px 18px;border:1px solid #62e6c5;border-radius:10px;background:#071019ed;color:#edf8ff;font:14px/1.5 system-ui;box-shadow:0 12px 40px #0009;pointer-events:none;text-align:center;white-space:pre-wrap';document.body.appendChild(hud);}
+ hud.textContent=message;hud.style.display='block';clearTimeout(hud._hideTimer);hud._hideTimer=setTimeout(()=>{hud.style.display='none';},4200);
+}
+function forgeAttachInteraction(type,name,textValue,id){
+ if(!selected)return showToast('Select an object first');
+ selected.userData.interaction={type,name:name||selected.name,text:textValue||'',id:id||name||selected.name};
+ selected.userData.components=selected.userData.components||[];
+ if(!selected.userData.components.some(x=>x.type==='Interaction'))selected.userData.components.push({type:'Interaction'});
+ recordHistory();renderStudio();showToast('Interaction attached to '+selected.name);
+}
+function forgeInteractNearest(){
+ if(!playPlayer)return;
+ let nearest=null,dist=3.1;
+ for(const o of objects){if(!o.visible||!o.userData.interaction||o===playPlayer)continue;const p=new THREE.Vector3();o.getWorldPosition(p);const d=p.distanceTo(playPlayer.position);if(d<dist){nearest=o;dist=d;}}
+ if(!nearest){forgeNotice('Nothing to interact with nearby.');return;}
+ const it=nearest.userData.interaction, id=String(it.id||it.name||nearest.name);
+ if(it.type==='pickup'){if(!forgeGameState.inventory.includes(id))forgeGameState.inventory.push(id);nearest.visible=false;forgeNotice('Picked up: '+it.name+'\nInventory: '+forgeGameState.inventory.join(', '));}
+ else if(it.type==='dialogue'){forgeNotice((it.name||'Character')+'\n'+(it.text||'...'));}
+ else if(it.type==='quest'){forgeGameState.quests[id]=forgeGameState.quests[id]||{name:it.name,status:'active',text:it.text};forgeNotice('Quest started: '+it.name+'\n'+(it.text||'Quest accepted.'));}
+ else if(it.type==='door'){nearest.userData._doorOpen=!nearest.userData._doorOpen;nearest.rotation.y+=nearest.userData._doorOpen?Math.PI/2:-Math.PI/2;forgeNotice((it.name||'Door')+(nearest.userData._doorOpen?' opened.':' closed.'));}
+ else if(it.type==='checkpoint'){forgeGameState.checkpoint=playPlayer.position.toArray();localStorage.setItem('forge-checkpoint',JSON.stringify(forgeGameState.checkpoint));forgeNotice('Checkpoint saved.');}
+ else if(it.type==='save'){forgeGameState.checkpoint=playPlayer.position.toArray();localStorage.setItem('forge-game-save',JSON.stringify({inventory:forgeGameState.inventory,quests:forgeGameState.quests,checkpoint:forgeGameState.checkpoint}));forgeNotice('Game saved in this browser.');}
+ else forgeNotice((it.name||nearest.name)+'\n'+(it.text||'Nothing unusual.'));
+ localStorage.setItem('forge-game-state',JSON.stringify(forgeGameState));
+}
+function forgeTerrainFromSelection(){return selected?.userData.type==='Terrain'?selected:objects.find(o=>o.userData.type==='Terrain'&&o.visible)||null;}
+function forgeTerrainBrush(event){
+ if((!forgeSculptEnabled&&!forgeWorld.paintMode)||!playing===true&&false)return;
+ const terrain=forgeTerrainFromSelection();if(!terrain)return;
+ const rect=renderer.domElement.getBoundingClientRect(),mouse=new THREE.Vector2((event.clientX-rect.left)/rect.width*2-1,-((event.clientY-rect.top)/rect.height)*2+1);
+ const ray=new THREE.Raycaster();ray.setFromCamera(mouse,camera);const hit=ray.intersectObject(terrain,false)[0];if(!hit)return;
+ const point=terrain.worldToLocal(hit.point.clone()),geo=terrain.geometry,pos=geo.attributes.position,radius=forgeWorld.sculptRadius,strength=forgeWorld.sculptStrength;
+ if(forgeWorld.paintMode){
+  let colors=geo.getAttribute('color');if(!colors){colors=new THREE.Float32BufferAttribute(new Float32Array(pos.count*3).fill(1),3);geo.setAttribute('color',colors);if(terrain.material)terrain.material.vertexColors=true;}
+  const col=new THREE.Color(forgeWorld.paintColor);
+  for(let i=0;i<pos.count;i++){const dx=pos.getX(i)-point.x,dz=pos.getZ(i)-point.z,d=Math.hypot(dx,dz);if(d>radius)continue;const w=Math.max(0,1-d/radius)*.7;const old=new THREE.Color(colors.getX(i),colors.getY(i),colors.getZ(i));old.lerp(col,w);colors.setXYZ(i,old.r,old.g,old.b);}
+  colors.needsUpdate=true;
+ }else{
+  const mode=forgeWorld.sculptMode,near=[];
+  for(let i=0;i<pos.count;i++){const dx=pos.getX(i)-point.x,dz=pos.getZ(i)-point.z,d=Math.hypot(dx,dz);if(d<=radius)near.push({i,w:Math.max(0,1-d/radius)});}
+  let avg=0;for(const v of near)avg+=pos.getY(v.i);avg/=Math.max(1,near.length);
+  const originals=near.map(v=>pos.getY(v.i));
+  for(let j=0;j<near.length;j++){const v=near[j],y=pos.getY(v.i);if(mode==='raise')pos.setY(v.i,y+strength*v.w*.12);else if(mode==='lower')pos.setY(v.i,y-strength*v.w*.12);else if(mode==='flatten')pos.setY(v.i,THREE.MathUtils.lerp(y,point.y,strength*v.w*.18));else pos.setY(v.i,THREE.MathUtils.lerp(y,avg,strength*v.w*.12));}
+  pos.needsUpdate=true;geo.computeVertexNormals();terrain.userData.terrainHeights=Array.from(pos.array).filter((_,i)=>i%3===1);
+  terrain.userData.foliageBuilt=false;
+ }
+ terrain.geometry.computeBoundingSphere();terrain.geometry.computeBoundingBox();
+}
+function forgeRebuildFoliage(){
+ const t=forgeTerrainFromSelection();if(!t)return showToast('Select or create a Terrain first');
+ for(const child of [...t.children]){t.remove(child);if(child.geometry&&child!==t){}}
+ t.userData.foliageBuilt=false;t.userData.grassBlades=null;t.userData.grassMesh=null;
+ const density=document.getElementById('grassDensity')?.value||'medium',trees=document.getElementById('treeDensity')?.value||'medium';
+ t.userData._forgeGrassCount=density==='low'?180:density==='high'?650:400;
+ t.userData._forgeTreeCount=trees==='low'?8:trees==='high'?28:16;
+ populateTerrain(t,Date.now());showToast('Vegetation rebuilt');
+}
+function forgeEnsureWorldLights(){
+ if(!forgeSun){forgeSun=new THREE.DirectionalLight(0xffedcc,2.1);forgeSun.name='FORGE Sun';forgeSun.position.set(8,16,4);forgeSun.castShadow=true;scene.add(forgeSun);}
+ if(!forgeHemisphere){forgeHemisphere=new THREE.HemisphereLight(0xc8e3ff,0x4b453b,1.05);forgeHemisphere.name='FORGE Sky Light';scene.add(forgeHemisphere);}
+}
+function forgeApplyWorld(){
+ forgeEnsureWorldLights();const t=forgeWorld.time,angle=t*Math.PI*2-Math.PI/2,day=Math.max(0,Math.sin(angle)),sunHeight=Math.sin(angle);
+ forgeSun.position.set(Math.cos(angle)*35,Math.max(-8,sunHeight*35),Math.sin(angle)*35);forgeSun.intensity=.08+day*2.25;forgeSun.color.setHSL(.10+day*.015,.48,.72+day*.18);
+ forgeHemisphere.intensity=.18+day*1.15;forgeHemisphere.color.setHSL(.57,.45,.55+day*.3);forgeHemisphere.groundColor.setHSL(.08,.28,.14+day*.1);
+ const sky=new THREE.Color().setHSL(.60,.42,.025+day*.31);scene.background=sky;
+ if(forgeWorld.weather==='fog')scene.fog=new THREE.FogExp2(sky,0.028);
+ else if(forgeWorld.weather==='clear')scene.fog=null;
+ else scene.fog=new THREE.FogExp2(sky,forgeWorld.weather==='rain'?.0045:.003);
+ forgeEnsureWeather();
+}
+function forgeEnsureWeather(){
+ const needed=forgeWorld.weather==='rain'?700:forgeWorld.weather==='snow'?350:0;
+ if(needed===0){if(forgeWeatherPoints){scene.remove(forgeWeatherPoints);forgeWeatherPoints.geometry.dispose();forgeWeatherPoints.material.dispose();forgeWeatherPoints=null;}return;}
+ if(forgeWeatherPoints&&forgeWeatherPoints.geometry.attributes.position.count===needed)return;
+ if(forgeWeatherPoints){scene.remove(forgeWeatherPoints);forgeWeatherPoints.geometry.dispose();forgeWeatherPoints.material.dispose();}
+ const positions=new Float32Array(needed*3);forgeWeatherVelocities=[];
+ for(let i=0;i<needed;i++){positions[i*3]=(Math.random()-.5)*45;positions[i*3+1]=Math.random()*24;positions[i*3+2]=(Math.random()-.5)*45;forgeWeatherVelocities.push(.7+Math.random()*1.8);}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(positions,3));
+ const m=new THREE.PointsMaterial({color:forgeWorld.weather==='rain'?0xa8d9ff:0xffffff,size:forgeWorld.weather==='rain'?.045:.09,transparent:true,opacity:forgeWorld.weather==='rain'?.65:.85,depthWrite:false});
+ forgeWeatherPoints=new THREE.Points(g,m);forgeWeatherPoints.name='FORGE Weather';scene.add(forgeWeatherPoints);
+}
+function animateWorldSimulation(dt){
+ if(forgeWorld.timeSpeed>0)forgeWorld.time=(forgeWorld.time+dt*forgeWorld.timeSpeed)%1;
+ if(forgeSun){const t=forgeWorld.time,angle=t*Math.PI*2-Math.PI/2,day=Math.max(0,Math.sin(angle));forgeSun.position.set(Math.cos(angle)*35,Math.max(-8,Math.sin(angle)*35),Math.sin(angle)*35);forgeSun.intensity=.08+day*2.25;forgeHemisphere.intensity=.18+day*1.15;scene.background?.isColor&&(scene.background.setHSL(.60,.42,.025+day*.31));}
+ if(forgeWeatherPoints){const p=forgeWeatherPoints.geometry.attributes.position;const center=playPlayer?.position||camera.position;for(let i=0;i<p.count;i++){let x=p.getX(i)+forgeWorld.wind*dt*.8,y=p.getY(i)-forgeWeatherVelocities[i]*dt*(forgeWorld.weather==='rain'?7:2.2),z=p.getZ(i);if(y<center.y-3){x=center.x+(Math.random()-.5)*45;y=center.y+Math.random()*24;z=center.z+(Math.random()-.5)*45;}p.setXYZ(i,x,y,z);}p.needsUpdate=true;forgeWeatherPoints.position.set(0,0,0);}
+ for(const t of objects){if(t.userData.type!=='Terrain')continue;for(const child of t.children){if(!child.isGroup||!String(child.name).startsWith('Tree '))continue;const base=child.userData._windBase??child.rotation.z;child.userData._windBase=base;child.rotation.z=base+Math.sin(performance.now()*.0015+child.position.x)*forgeWorld.wind*.012;}}
+}
+function forgeApplyPerformance(preset){
+ const cfg={potato:{pixelRatio:.7,shadows:false,grass:'low'},balanced:{pixelRatio:1,shadows:true,grass:'medium'},high:{pixelRatio:Math.min(1.5,window.devicePixelRatio||1),shadows:true,grass:'high'}}[preset]||{pixelRatio:1,shadows:true,grass:'medium'};
+ renderer.setPixelRatio(cfg.pixelRatio);renderer.setSize(window.innerWidth,window.innerHeight);renderer.shadowMap.enabled=cfg.shadows;forgeWorld.quality=preset;
+ for(const t of objects){if(t.userData.type==='Terrain'&&t.userData.grassMesh){const max=cfg.grass==='low'?180:cfg.grass==='medium'?400:650;t.userData.grassMesh.count=Math.min(max,t.userData.grassBlades?.length||0);}}
+ showToast('Performance preset applied: '+preset);
+}
+
 function renderStudio(){
  $('#studioTabs').querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.stab===studioTab));
  const body=$('#studioBody');let h='';
@@ -304,6 +402,21 @@ function bindStudio(){
  on('makeTerrain',()=>{const size=clamp(+$(' #terSize'.trim()).value||40,8,200),res=clamp(+$(' #terRes'.trim()).value||48,8,120),amp=clamp(+$(' #terAmp'.trim()).value||0,0,15),color=$('#terColor').value;const geo=new THREE.PlaneGeometry(size,size,res,res);geo.rotateX(-Math.PI/2);const pos=geo.attributes.position,heights=[];for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),y=(Math.sin(x*.18)*Math.cos(z*.15)+Math.sin(z*.32+x*.12)*.45)*amp;pos.setY(i,y);heights.push(y);}geo.computeVertexNormals();const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color,roughness:.92}));mesh.userData.terrainSize=size;mesh.userData.terrainResolution=res;mesh.userData.terrainHeights=heights;mesh.userData.terrainAmplitude=amp;mesh.name='Terrain';mesh.userData.type='Terrain';mesh.userData.id='terrain-'+Date.now();mesh.userData.components=[];mesh.userData.script='';mesh.receiveShadow=true;scene.add(mesh);objects.push(mesh);pickables.push(mesh);populateTerrain(mesh);studioTerrain=mesh;renderTree();select(mesh);recordHistory();log('Generated procedural terrain');showToast('Terrain generated');});
  on('flattenTerrain',()=>{const p=objects.find(o=>o.userData.type==='Plane');if(p){p.position.y=0;select(p);}else{addObject('Plane',{name:'Flat Ground'});}});
  on('applyEnv',()=>{scene.background=new THREE.Color($('#envBg').value);const density=+$('#envFog').value;scene.fog=density>0?new THREE.FogExp2($('#envFogColor').value,density):null;showToast('Environment applied');});
+
+ on('toggleSculpt',()=>{forgeSculptEnabled=!forgeSculptEnabled;forgeWorld.paintMode=false;const b=$('#toggleSculpt');b.textContent=forgeSculptEnabled?'Disable Sculpt Brush':'Enable Sculpt Brush';b.classList.toggle('primary',forgeSculptEnabled);renderer.domElement.style.cursor=forgeSculptEnabled?'crosshair':'default';if(forgeSculptEnabled)showToast('Sculpt enabled: click and drag the selected terrain');});
+ on('togglePaint',()=>{forgeWorld.paintMode=!forgeWorld.paintMode;forgeSculptEnabled=false;forgeWorld.paintColor=$('#terrainPaintColor').value;const b=$('#togglePaint');b.textContent=forgeWorld.paintMode?'Disable Paint Brush':'Enable Paint Brush';b.classList.toggle('primary',forgeWorld.paintMode);renderer.domElement.style.cursor=forgeWorld.paintMode?'crosshair':'default';});
+ on('rebuildFoliage',forgeRebuildFoliage);
+ on('applyFoliage',()=>{forgeRebuildFoliage();});
+ on('applyWorldCycle',()=>{forgeWorld.time=+$('#worldTime').value;forgeWorld.timeSpeed=+$('#worldTimeSpeed').value;forgeWorld.weather=$('#worldWeather').value;forgeWorld.wind=+$('#worldWind').value;forgeApplyWorld();showToast('Day/night, weather and wind applied');});
+ on('applyPerformancePreset',()=>forgeApplyPerformance($('#performancePreset').value));
+ on('attachInteraction',()=>forgeAttachInteraction($('#interactionType').value,$('#interactionName').value.trim(),$('#interactionText').value.trim(),$('#interactionId').value.trim()));
+ on('removeInteraction',()=>{if(selected){delete selected.userData.interaction;renderStudio();recordHistory();showToast('Interaction removed');}});
+ on('createQuestTemplate',()=>{const o=addObject('Box',{name:'Quest Giver'});o.position.set(2,.8,0);select(o);forgeAttachInteraction('quest','New Quest Giver','Find the missing item and return.','first_quest');});
+ on('createInventoryTemplate',()=>{const o=addObject('Icosahedron',{name:'Pickup Item',color:'#ffd35c'});o.position.set(1,.6,1);select(o);forgeAttachInteraction('pickup','Pickup Item','A useful item.','item_'+Date.now());});
+ on('createSavePoint',()=>{const o=addObject('Cylinder',{name:'Save Point',color:'#56bfff'});o.scale.set(.65,.25,.65);o.position.set(-2,.25,0);select(o);forgeAttachInteraction('save','Save Point','Progress saved.','save_point');});
+ on('resetGameState',()=>{forgeGameState={inventory:[],quests:{},checkpoint:[0,0,3],lastInteract:0};localStorage.removeItem('forge-game-state');localStorage.removeItem('forge-game-save');renderStudio();showToast('Playtest state reset');});
+ on('applyPlayerSettings',()=>{const p=objects.find(o=>o.userData.type==='Player');if(!p)return showToast('Add a Player prefab first');p.userData.controller=p.userData.controller||{};p.userData.controller.walkSpeed=clamp(+$('playerWalk').value||5,1,15);p.userData.controller.sprintSpeed=clamp(+$('playerSprint').value||8,1,25);p.userData.controller.jumpSpeed=clamp(+$('playerJump').value||6,1,14);p.userData.controller.gravity=clamp(+$('playerGravity').value||18,2,40);recordHistory();showToast('Player controller updated');});
+
  on('scatterProps',()=>{for(let i=0;i<30;i++){const o=addObject(['Box','Sphere','Cone','Cylinder'][i%4],{name:'Prop '+(i+1)});o.position.set((Math.random()-.5)*24,.5,(Math.random()-.5)*24);const s=.25+Math.random()*1.1;o.scale.setScalar(s);}recordHistory();});
  on('addPlatform',()=>{const o=addObject('Box',{name:'Platform'});o.scale.set(5,.35,5);o.position.y=1;select(o);});
  on('addTrigger',()=>{const o=addObject('Box',{name:'Trigger Zone',color:'#39d9c2'});o.scale.set(2,2,2);o.material.transparent=true;o.material.opacity=.22;o.userData.triggerZone=true;select(o);});
@@ -338,6 +451,10 @@ function bindStudio(){
  on('saveNow',saveScene);on('loadLast',()=>{try{const d=JSON.parse(localStorage.getItem('forge-scene'));loadSceneData(d);showToast('Browser save restored');}catch(e){showToast('No valid browser save found');}});
  on('exportSettings',()=>downloadBlob(new Blob([JSON.stringify({project:projectName.value,graphics:{shadows:renderer.shadowMap.enabled,toneMapping:renderer.toneMapping,exposure:renderer.toneMappingExposure}},null,2)],{type:'application/json'}),'forge-settings.json'));
 }
+renderer.domElement.addEventListener('pointerdown',e=>{if(forgeSculptEnabled||forgeWorld.paintMode){e.preventDefault();forgeTerrainBrush(e);if(orbit)orbit.enabled=false;}});
+renderer.domElement.addEventListener('pointermove',e=>{if((forgeSculptEnabled||forgeWorld.paintMode)&&e.buttons===1)forgeTerrainBrush(e);});
+window.addEventListener('pointerup',()=>{if(orbit)orbit.enabled=true;});
+document.addEventListener('keydown',e=>{if(e.code==='KeyE'&&playing&&!e.repeat){e.preventDefault();forgeInteractNearest();}});
 function renderKeyList(){const e=$('#keyList');if(!e)return;const k=selected?.userData.keyframes||[];e.innerHTML=k.length?k.map((x,i)=>'<div class="studio-pill">Key '+(i+1)+' · '+x.time+'s <button data-delkey="'+i+'">×</button></div>').join(''):'<p>No keyframes yet.</p>';e.querySelectorAll('[data-delkey]').forEach(b=>b.onclick=()=>{selected.userData.keyframes.splice(+b.dataset.delkey,1);renderKeyList();recordHistory();});const rail=$('#timelineRail');if(rail){rail.innerHTML='';k.forEach(x=>{const m=document.createElement('i');m.style.cssText='position:absolute;top:2px;bottom:2px;width:6px;background:var(--accent);border-radius:2px;left:'+Math.min(98,x.time/Math.max(1,...k.map(q=>q.time))*100)+'%';rail.appendChild(m);});}}
 function renderPrefabList(){const e=$('#prefabList');if(!e)return;const names=Object.keys(studioPrefabs);e.innerHTML=names.length?names.map(n=>'<button data-spawnprefab="'+esc(n)+'">'+esc(n)+'</button>').join(''):'<p>No saved prefabs yet.</p>';e.querySelectorAll('[data-spawnprefab]').forEach(b=>b.onclick=()=>{const d=studioPrefabs[b.dataset.spawnprefab],o=addObject(d.type,{...d,name:b.dataset.spawnprefab+' Instance'});if(o)select(o);});}
 function renderScenePicker(){const e=$('#scenePicker');if(!e)return;const names=Object.keys(studioScenes);e.innerHTML=names.map(n=>'<option>'+esc(n)+'</option>').join('');}
@@ -350,7 +467,7 @@ function animateStudioObjects(dt){for(const o of objects){const logic=o.userData
 }}
 const oldStudioAnimate=animate;
 
-try{startup();}catch(err){log('FORGE startup failed: '+(err.stack||err.message),'error');$('#fatalError').style.display='block';$('#fatalMessage').textContent=err.stack||err.message;$('#engineStatus').textContent='● STARTUP ERROR';}
+try{const gs=localStorage.getItem('forge-game-state');if(gs)forgeGameState={...forgeGameState,...JSON.parse(gs)};const cp=localStorage.getItem('forge-game-save');if(cp){const sv=JSON.parse(cp);forgeGameState={...forgeGameState,...sv};}}catch(e){}try{startup();forgeApplyPerformance('balanced');}catch(err){log('FORGE startup failed: '+(err.stack||err.message),'error');$('#fatalError').style.display='block';$('#fatalMessage').textContent=err.stack||err.message;$('#engineStatus').textContent='● STARTUP ERROR';}
 </script>
 </body>
 </html>
