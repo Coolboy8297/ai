@@ -65,33 +65,87 @@ function mat(color,roughness=.65,metalness=0){return new THREE.MeshStandardMater
 function ellipsoid(parent,name,pos,scale,material){const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,40,32),material);mesh.name=name;mesh.position.set(...pos);mesh.scale.set(...scale);parent.add(mesh);return mesh}
 function makeFallback(){
  avatar.clear();modelRoot=null;morphTargets=[];
- const skin=mat('#d6a17e',.53),skinLight=mat('#e6b694',.5),shadowSkin=mat('#ad755b',.65),hair=mat('#30241f',.8),brow=mat('#49312a',.85),white=mat('#f5f0e8',.3),iris=mat('#4d827e',.32),pupil=mat('#101922',.2),lip=mat('#985c58',.48),dark=mat('#111923',.55);
- const head=new THREE.Group();head.name='Head';avatar.add(head);
- ellipsoid(head,'Skull',[0,.35,0],[.78,1.02,.66],skin);
- ellipsoid(head,'Jaw',[0,-.15,.02],[.59,.57,.58],skin);
- ellipsoid(head,'EarL',[-.77,.22,0],[.14,.25,.12],skinLight);ellipsoid(head,'EarR',[.77,.22,0],[.14,.25,.12],skinLight);
- // cheeks and nose bridge
- ellipsoid(head,'CheekL',[-.37,.02,.48],[.27,.24,.19],skinLight);ellipsoid(head,'CheekR',[.37,.02,.48],[.27,.24,.19],skinLight);
- ellipsoid(head,'NoseBridge',[0,.02,.59],[.14,.3,.16],skinLight);ellipsoid(head,'NoseTip',[0,-.13,.7],[.19,.13,.15],skinLight);
- ellipsoid(head,'NostrilL',[-.095,-.2,.69],[.045,.025,.02],shadowSkin);ellipsoid(head,'NostrilR',[.095,-.2,.69],[.045,.025,.02],shadowSkin);
- for(const s of [-1,1]){
-  ellipsoid(head,'EyeSocket'+s,[s*.29,.31,.535],[.235,.145,.09],shadowSkin);
-  ellipsoid(head,'EyeWhite'+s,[s*.29,.31,.59],[.185,.095,.065],white);
-  ellipsoid(head,'Iris'+s,[s*.29,.31,.647],[.061,.065,.026],iris);
-  ellipsoid(head,'Pupil'+s,[s*.29,.31,.668],[.029,.037,.015],pupil);
-  ellipsoid(head,'Brow'+s,[s*.29,.49,.57],[.22,.055,.08],brow).rotation.z=s*-.08;
+ // Procedural portrait materials: a generated skin texture adds fine pores and tonal variation.
+ function skinTexture(){
+  const c=document.createElement('canvas');c.width=512;c.height=512;const g=c.getContext('2d');
+  const grad=g.createLinearGradient(0,0,512,512);grad.addColorStop(0,'#e6b99a');grad.addColorStop(.48,'#d6a080');grad.addColorStop(1,'#bd8468');g.fillStyle=grad;g.fillRect(0,0,512,512);
+  let seed=731;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+  for(let i=0;i<14500;i++){const x=rnd()*512,y=rnd()*512,r=.25+rnd()*1.05;g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fillStyle=rnd()>.5?'rgba(94,48,35,'+(rnd()*.12)+')':'rgba(255,226,199,'+(rnd()*.2)+')';g.fill()}
+  for(let i=0;i<70;i++){const x=125+rnd()*262,y=210+rnd()*145;g.beginPath();g.arc(x,y,.6+rnd()*1.4,0,Math.PI*2);g.fillStyle='rgba(111,55,40,.18)';g.fill()}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
  }
- const mouth=ellipsoid(head,'Mouth',[0,-.37,.572],[.235,.055,.045],lip);morphTargets.push({mesh:mouth,baseY:.055});
- ellipsoid(head,'UpperLip',[0,-.34,.585],[.22,.035,.038],skinLight);
- // swept hair cap and side locks
- const cap=ellipsoid(head,'HairCap',[0,1.02,-.035],[.77,.43,.68],hair);cap.rotation.x=-.08;
- ellipsoid(head,'HairFringe',[-.1,.79,.48],[.48,.19,.22],hair).rotation.z=-.22;
- ellipsoid(head,'HairSideL',[-.68,.53,.04],[.14,.46,.43],hair);ellipsoid(head,'HairSideR',[.68,.51,.02],[.14,.43,.4],hair);
- // neck, shoulders, shirt
- ellipsoid(avatar,'Neck',[0,-.75,-.03],[.25,.45,.26],skin);
- ellipsoid(avatar,'Shoulders',[0,-1.23,-.1],[.93,.46,.43],mat('#263e58',.78));
- ellipsoid(avatar,'ShirtCollar',[0,-.91,.23],[.32,.23,.12],mat('#e2e8ed',.72));
- head.position.y=.12;head.userData.isHead=true;avatar.userData.head=head;avatar.scale.setScalar(Number($('scale').value));avatar.position.y=-.05;$('avatarLabel').textContent='AVATAR: PROCEDURAL';
+ const skinTex=skinTexture();
+ const skin=new THREE.MeshStandardMaterial({color:'#f0c4a4',map:skinTex,roughness:.64});
+ const skinLight=new THREE.MeshStandardMaterial({color:'#f5cdb0',map:skinTex,roughness:.56});
+ const warmShadow=mat('#a96d58',.76),deepShadow=mat('#70483e',.8);
+ const hair=mat('#241a17',.82),hairLight=mat('#493128',.78),hairDark=mat('#171312',.9);
+ const brow=mat('#39251f',.88),white=mat('#f5eee4',.25),iris=mat('#477c79',.3),irisInner=mat('#244c50',.35),pupil=mat('#091019',.15),lip=mat('#985955',.48),lipLight=mat('#b87470',.48),dark=mat('#111923',.55),shirt=mat('#263d56',.78),shirtLight=mat('#3a5876',.72);
+ const head=new THREE.Group();head.name='Head';avatar.add(head);
+ // Skull, temples, jaw and chin layered for a more human silhouette.
+ ellipsoid(head,'Skull',[0,.35,0],[.77,1.02,.64],skin);
+ ellipsoid(head,'Forehead',[0,.66,.285],[.59,.46,.39],skinLight);
+ ellipsoid(head,'Jaw',[0,-.17,.015],[.575,.55,.55],skin);
+ ellipsoid(head,'Chin',[0,-.48,.245],[.31,.16,.29],skinLight);
+ for(const s of [-1,1]){
+  ellipsoid(head,'Temple'+s,[s*.59,.36,.11],[.2,.43,.37],skin);
+  // Ears with concha, inner fold, tragus and lobe.
+  ellipsoid(head,'Ear'+s,[s*.765,.19,-.015],[.145,.255,.13],skin);
+  ellipsoid(head,'EarInner'+s,[s*.817,.205,.075],[.067,.16,.065],warmShadow);
+  ellipsoid(head,'EarFold'+s,[s*.83,.24,.105],[.028,.105,.028],skinLight);
+  ellipsoid(head,'EarTragus'+s,[s*.79,.11,.13],[.043,.064,.04],skinLight);
+  ellipsoid(head,'Cheek'+s,[s*.37,.015,.42],[.285,.235,.22],skinLight);
+  ellipsoid(head,'CheekShadow'+s,[s*.43,-.095,.445],[.19,.11,.13],warmShadow);
+  // Eye socket, sclera, iris rings, pupil, wet catchlights and upper/lower lids.
+  ellipsoid(head,'EyeSocket'+s,[s*.29,.315,.515],[.245,.157,.11],warmShadow);
+  ellipsoid(head,'EyeWhite'+s,[s*.29,.315,.575],[.19,.095,.075],white);
+  ellipsoid(head,'IrisOuter'+s,[s*.29,.315,.638],[.071,.073,.03],irisInner);
+  ellipsoid(head,'Iris'+s,[s*.29,.315,.656],[.056,.059,.024],iris);
+  ellipsoid(head,'Pupil'+s,[s*.29,.315,.674],[.03,.039,.014],pupil);
+  ellipsoid(head,'EyeGlint'+s,[s*.29-.018,.339,.687],[.018,.018,.008],mat('#ffffff',.08));
+  ellipsoid(head,'EyeGlintSmall'+s,[s*.29+.02,.297,.686],[.008,.009,.005],white);
+  ellipsoid(head,'UpperLid'+s,[s*.29,.397,.601],[.196,.045,.067],skinLight).rotation.z=s*.06;
+  ellipsoid(head,'LowerLid'+s,[s*.29,.236,.598],[.185,.027,.05],skinLight).rotation.z=-s*.025;
+  ellipsoid(head,'UnderEye'+s,[s*.29,.207,.53],[.19,.038,.045],warmShadow);
+  ellipsoid(head,'BrowBase'+s,[s*.29,.49,.53],[.235,.071,.095],skin);
+  ellipsoid(head,'Brow'+s,[s*.29,.515,.582],[.22,.042,.064],brow).rotation.z=s*-.08;
+  // Eyelashes: short dark tapered-looking strokes following the lid.
+  for(let i=0;i<7;i++){const xx=s*.29-s*.145+i*s*.048;const lash=ellipsoid(head,'Lash'+s+'_'+i,[xx,.394,.654],[.008,.027,.009],hairDark);lash.rotation.z=s*.22}
+  // Fine smile/cheek creases.
+  for(let j=0;j<2;j++){const crease=ellipsoid(head,'CheekCrease'+s+'_'+j,[s*(.49+j*.035),-.09-j*.045,.565-j*.012],[.075,.008,.008],warmShadow);crease.rotation.z=s*.36}
+ }
+ // Nose bridge, tip, wings and nostrils with soft highlights.
+ ellipsoid(head,'NoseBridge',[0,.025,.59],[.135,.3,.17],skinLight);
+ ellipsoid(head,'NoseTip',[0,-.145,.71],[.165,.125,.14],skinLight);
+ for(const s of [-1,1]){
+  ellipsoid(head,'NoseWing'+s,[s*.125,-.17,.665],[.085,.075,.085],skin);
+  ellipsoid(head,'Nostril'+s,[s*.083,-.218,.718],[.043,.022,.018],deepShadow);
+ }
+ ellipsoid(head,'Philtrum',[0,-.275,.57],[.055,.085,.025],skinLight);
+ // Mouth cavity, lips, teeth and tongue layers. Jaw-open tracking scales the cavity.
+ const mouth=ellipsoid(head,'Mouth',[0,-.382,.584],[.218,.047,.035],deepShadow);morphTargets.push({mesh:mouth,baseY:.047});
+ ellipsoid(head,'UpperLip',[0,-.35,.6],[.218,.034,.04],lip);
+ ellipsoid(head,'LowerLip',[0,-.414,.595],[.19,.038,.035],lipLight);
+ ellipsoid(head,'Teeth',[0,-.374,.614],[.14,.014,.012],white);
+ ellipsoid(head,'Tongue',[0,-.405,.615],[.075,.012,.01],lipLight);
+ // Hair cap with many individual swept strands, side locks and hairline detail.
+ const cap=ellipsoid(head,'HairCap',[0,1.005,-.045],[.78,.43,.68],hair);cap.rotation.x=-.08;
+ ellipsoid(head,'HairFringe',[ -.105,.79,.465],[.47,.17,.215],hairLight).rotation.z=-.23;
+ ellipsoid(head,'HairLockL',[-.48,.79,.42],[.22,.16,.18],hair).rotation.z=-.42;
+ ellipsoid(head,'HairLockR',[.27,.82,.43],[.27,.13,.18],hairLight).rotation.z=.25;
+ ellipsoid(head,'HairSideL',[-.685,.48,.035],[.135,.45,.39],hair);
+ ellipsoid(head,'HairSideR',[.685,.47,.025],[.135,.43,.38],hair);
+ function strand(points,r,material){const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(...p)));const mesh=new THREE.Mesh(new THREE.TubeGeometry(curve,18,r,5,false),material);head.add(mesh)}
+ for(let i=0;i<27;i++){const x=-.64+i*.049;const lift=.06+Math.sin(i*.67)*.055;strand([[x,.84,.45],[x+.07,.99+lift,.36],[x+.03,1.19+lift,.02],[x-.09,1.22+lift,-.23]],.008+(i%3)*.001,i%4===0?hairLight:hairDark)}
+ for(let i=0;i<13;i++){const side=i<7?-1:1,k=i%7;strand([[side*(.58+k*.018),.78-k*.035,.34],[side*(.68+k*.012),.57-k*.025,.19],[side*(.67+k*.012),.35-k*.018,.08]],.008,hairLight)}
+ // Neck anatomy and clothing with collar, seams, shoulder folds and a subtle chest panel.
+ ellipsoid(avatar,'Neck',[0,-.72,-.03],[.245,.43,.26],skin);
+ ellipsoid(avatar,'NeckShadow',[0,-.79,.18],[.17,.29,.08],warmShadow);
+ ellipsoid(avatar,'Shoulders',[0,-1.25,-.1],[.94,.47,.44],shirt);
+ ellipsoid(avatar,'ShirtChest',[0,-1.39,.29],[.57,.28,.15],shirtLight);
+ ellipsoid(avatar,'CollarL',[-.17,-.97,.285],[.19,.24,.105],mat('#dce6ef',.7)).rotation.z=-.25;
+ ellipsoid(avatar,'CollarR',[.17,-.97,.285],[.19,.24,.105],mat('#dce6ef',.7)).rotation.z=.25;
+ for(const s of [-1,1]){const seam=ellipsoid(avatar,'ShoulderSeam'+s,[s*.57,-1.19,.27],[.28,.012,.018],mat('#66809b',.8));seam.rotation.z=s*.18}
+ head.position.y=.12;head.userData.isHead=true;avatar.userData.head=head;avatar.scale.setScalar(Number($('scale').value));avatar.position.y=-.05;$('avatarLabel').textContent='AVATAR: DETAILED PROCEDURAL';
 }
 makeFallback();
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(stage);resize();
@@ -119,7 +173,7 @@ function trackLoop(now){
  if(!tracking)return;
  if(video.readyState>=2&&video.currentTime!==lastVideoTime){lastVideoTime=video.currentTime;
   try{const result=faceLandmarker.detectForVideo(video,now);const faces=result.faceLandmarks||[];latest.face=faces.length>0;
-   if(faces.length){const lm=faces[0],left=lm[234],right=lm[454],top=lm[10],bottom=lm[152],nose=lm[1];const cx=(left.x+right.x)/2,cy=(top.y+bottom.y)/2;let yaw=(nose.x-cx)/Math.max(.001,right.x-left.x);let pitch=(nose.y-cy)/Math.max(.001,bottom.y-top.y);headTarget.y=THREE.MathUtils.clamp(yaw*3.3,-.8,.8)-centerYaw;headTarget.x=THREE.MathUtils.clamp((pitch-.05)*3.0,-.55,.55)-centerPitch;
+   if(faces.length){const lm=faces[0],left=lm[234],right=lm[454],top=lm[10],bottom=lm[152],nose=lm[1];const cx=(left.x+right.x)/2,cy=(top.y+bottom.y)/2;let yaw=(nose.x-cx)/Math.max(.001,right.x-left.x);let pitch=(nose.y-cy)/Math.max(.001,bottom.y-top.y);headTarget.y=THREE.MathUtils.clamp(-yaw*3.3,-.8,.8)-centerYaw; // Match the mirrored webcam preview: left/right now follow the user's view.headTarget.x=THREE.MathUtils.clamp((pitch-.05)*3.0,-.55,.55)-centerPitch;
     const cats=result.faceBlendshapes?.[0]?.categories||[];const val=n=>cats.find(c=>c.categoryName===n)?.score||0;latest.mouth=val('jawOpen');latest.blinkL=val('eyeBlinkLeft');latest.blinkR=val('eyeBlinkRight');latest.smile=val('mouthSmileLeft')+val('mouthSmileRight');
     $('mFace').textContent='YES';$('mYaw').textContent=Math.round(headTarget.y*57.3)+'°';$('mPitch').textContent=Math.round(headTarget.x*57.3)+'°';$('mMouth').textContent=Math.round(latest.mouth*100)+'%';setStatus(true,'TRACKING ACTIVE');applyMorphs(cats);
    }else{latest.face=false;$('mFace').textContent='NO';setStatus(true,'SEARCHING FOR FACE')}
