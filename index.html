@@ -1,108 +1,40 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090d14">
-<meta name="description" content="COMMAND AI — a browser-based AI assistant that runs open models on your device. No account or API key required.">
-<title>COMMAND AI — Browser AI</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090d14"><title>COMMAND VISION</title>
 <style>
-:root{color-scheme:dark;--bg:#080c12;--panel:#101722;--line:#253247;--text:#e8eef8;--muted:#91a0b5;--accent:#71e4c1;--blue:#8aa8ff;--warn:#ffc879}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a2d43 0,transparent 55%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
-header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;background:#090d14ed;backdrop-filter:blur(12px);z-index:3}
-.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.16em}.mark{width:30px;height:30px;border:2px solid var(--accent);border-radius:9px;display:grid;place-items:center;color:var(--accent);font-size:17px}
-.status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}.dot{width:8px;height:8px;background:#f0b45c;border-radius:50%}.dot.ok{background:var(--accent)}
-main{max-width:1120px;margin:0 auto;padding:28px 18px 40px}.intro h1{font-size:clamp(28px,5vw,43px);line-height:1.1;margin:0 0 10px;letter-spacing:-.04em}.intro h1 span{color:var(--accent)}.intro p{margin:0;color:var(--muted)}
-.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;margin-top:24px}.panel{border:1px solid var(--line);background:#101722e8;border-radius:16px;overflow:hidden}.side{padding:16px}.label{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:700;margin:2px 0 10px}.field{width:100%;background:#0b111a;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:10px;font:inherit}.btn{border:1px solid var(--line);background:#172233;color:var(--text);padding:9px 11px;border-radius:9px;cursor:pointer;font:inherit}.btn:hover{border-color:var(--accent)}.btn:disabled{opacity:.5;cursor:wait}.btn.primary{background:var(--accent);border-color:var(--accent);color:#06130f;font-weight:750}.btnrow{display:flex;gap:8px;flex-wrap:wrap}.side .btn.full{width:100%;text-align:left;margin:3px 0}.small{font-size:12px;color:var(--muted);line-height:1.5}.chat{display:flex;flex-direction:column;min-height:590px}.chathead{padding:14px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.chathead strong{font-size:14px}.messages{padding:18px;display:flex;flex-direction:column;gap:14px;flex:1;min-height:350px;max-height:58vh;overflow:auto}.msg{max-width:92%;padding:12px 14px;border:1px solid var(--line);border-radius:13px;white-space:pre-wrap;overflow-wrap:anywhere}.msg.user{align-self:flex-end;background:#17332f;border-color:#27564e}.msg.assistant{align-self:flex-start;background:#141e2b}.msg.system{align-self:center;color:var(--muted);font-size:12px;border:0;text-align:center}.composer{padding:13px;border-top:1px solid var(--line)}textarea{width:100%;resize:vertical;min-height:68px;max-height:180px;background:#0a1018;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;outline:none}textarea:focus,.field:focus{border-color:var(--accent)}.composebottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}.divider{height:1px;background:var(--line);margin:14px 0}.notice{padding:10px;border:1px solid #3a4a5f;border-radius:10px;background:#0c1420;margin-top:10px}.progress{height:5px;border-radius:9px;background:#202b3a;overflow:hidden;margin:9px 0}.progress span{display:block;width:0;height:100%;background:var(--accent);transition:width .2s}.tag{display:inline-block;padding:3px 7px;border:1px solid var(--line);border-radius:20px;font-size:11px;color:var(--muted);margin:3px 3px 3px 0}.toolresult{font-size:12px;color:var(--accent)}.filelist{margin:7px 0;white-space:pre-wrap;overflow-wrap:anywhere}
-@media(max-width:760px){.layout{grid-template-columns:1fr}.side{order:2}.chat{min-height:65vh}.messages{max-height:55vh}header{padding:0 14px}.intro p{max-width:42ch}}
-</style>
-</head>
-<body>
-<header><div class="brand"><div class="mark">›</div> COMMAND AI</div><div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Browser AI not loaded</span></div></header>
-<main>
-<section class="intro"><h1>Your browser.<br><span>Your AI.</span></h1><p>A public, browser-based AI assistant. No Ollama, Python, account, or API key required.</p></section>
-<div class="layout">
-<aside class="panel side">
-<div class="label">BROWSER AI ENGINE</div>
-<select id="model" class="field" aria-label="AI model"><option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 2.5 · 0.5B (smaller download)</option><option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen 2.5 · 1.5B (more capable)</option></select>
-<button id="loadModel" class="btn primary full">Load AI model</button>
-<div class="progress"><span id="progressBar"></span></div><div id="progressText" class="small">The first load downloads model files and may take a while. The browser should cache them for later visits.</div>
-<div class="notice small"><b>Runs on your device.</b> Prompts are processed in your browser. Requires a WebGPU-capable browser and enough available memory/storage. Model downloads can be hundreds of MB or more.</div>
-<div class="divider"></div><div class="label">AGENT MODULES</div>
-<label style="display:flex;gap:9px;align-items:center;margin:8px 0 10px"><input type="checkbox" id="agentMode" checked> Enable built-in tools</label>
-<div class="small">The AI can request a calculator, current time, open a website, and inspect text files you explicitly attach. Tool access is restricted to this page.</div>
-<div id="toolsList" class="small" style="margin-top:8px"><span class="tag">Calculator</span><span class="tag">Time & date</span><span class="tag">Open URL</span><span class="tag">Attached text files</span></div>
-<div class="divider"></div><div class="label">ATTACH TEXT FILES</div><input type="file" id="textFiles" class="field" accept=".txt,.md,.csv,.json,.js,.py,.html,.css,.xml,.log,.yaml,.yml" multiple aria-label="Attach text files"><div id="fileList" class="small">Only files you select are available to the assistant. Files are read in this browser.</div>
-<div class="divider"></div><div class="label">QUICK COMMANDS</div>
-<button class="btn full sample" data-prompt="What can you do? Explain your tools and limitations.">› Show capabilities</button>
-<button class="btn full sample" data-prompt="Summarize our conversation so far.">› Summarize chat</button>
-<button class="btn full sample" data-prompt="Give me three useful things you can help me do.">› Suggest tasks</button>
-<div class="divider"></div><div class="small">Public site · Open-source browser inference via WebLLM · No hosted inference API configured.</div>
-</aside>
-<section class="panel chat"><div class="chathead"><strong>COMMAND SESSION</strong><button class="btn" id="clear">Clear chat</button></div><div class="messages" id="messages"><div class="msg system">Load a model to begin. After the first download, it may be cached by your browser.</div></div><div class="composer"><textarea id="prompt" placeholder="Ask a question or give a command… (Enter to send)" aria-label="Message"></textarea><div class="composebottom"><div class="small" id="hint">No model loaded</div><button class="btn primary" id="send" disabled>Send ↗</button></div></div></section>
-</div>
-</main>
-<script type="module">
-const $=id=>document.getElementById(id);
-let engine=null,loading=false,history=[],attachedFiles=[],busy=false;
-const SYSTEM=`You are COMMAND AI, a helpful and honest browser-based assistant. You may call a tool by responding with ONLY one JSON object like {"tool":"calculator","arguments":{"expression":"2+2"}}. Available tools: calculator with expression; current_time with no arguments; open_website with url; list_attached_files with no arguments; read_attached_file with filename. Only use tools when needed. Never claim an action succeeded unless the tool result confirms it. Tool access is limited to this page and files explicitly selected by the user. Do not claim to have internet search, arbitrary computer access, or image vision. If a tool result arrives, answer the original user using that result.`;
-function say(text,kind='assistant'){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight;return el}
-function status(ok,text){$('statusDot').classList.toggle('ok',ok);$('statusText').textContent=text}
-function safeCalc(expression){
- const s=String(expression).replaceAll(' ',''); if(!s||s.length>100)throw Error('Only arithmetic expressions are allowed.'); for(const ch of s){if(!'0123456789.+*/()%-'.includes(ch))throw Error('Only arithmetic expressions are allowed.');}
- let i=0;
- function expr(){let v=term();while(s[i]==='+'||s[i]==='-'){const op=s[i++],r=term();v=op==='+'?v+r:v-r}return v}
- function term(){let v=factor();while(s[i]==='*'||s[i]==='/'){const op=s[i++],r=factor();if(op==='/'&&r===0)throw Error('Division by zero.');v=op==='*'?v*r:v/r}return v}
- function factor(){if(s[i]==='+'){i++;return factor()}if(s[i]==='-'){i++;return -factor()}if(s[i]==='('){i++;const v=expr();if(s[i++]!==')')throw Error('Missing closing parenthesis.');return v}const start=i;while(/[0-9.]/.test(s[i]||''))i++;if(start===i)throw Error('Expected a number.');const v=Number(s.slice(start,i));if(!Number.isFinite(v))throw Error('Invalid number.');return v}
- const result=expr();if(i!==s.length||!Number.isFinite(result))throw Error('Invalid arithmetic expression.');return result;
-}
-async function runTool(name,args={}){
- if(name==='calculator')return {expression:args.expression,result:safeCalc(args.expression)};
- if(name==='current_time')return {time:new Date().toLocaleString(),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone};
- if(name==='open_website'){const u=new URL(String(args.url||''));if(!['http:','https:'].includes(u.protocol))throw Error('Only HTTP and HTTPS URLs are allowed.');const w=window.open(u.href,'_blank','noopener,noreferrer');return {url:u.href,opened:!!w,note:w?'Opened in a new tab.':'The browser blocked the popup; allow popups for this site.'}}
- if(name==='list_attached_files')return {files:attachedFiles.map(f=>({name:f.name,characters:f.content.length}))};
- if(name==='read_attached_file'){const f=attachedFiles.find(x=>x.name===String(args.filename||''));if(!f)throw Error('That file was not selected or its name does not match.');return {name:f.name,content:f.content.slice(0,20000),truncated:f.content.length>20000};}
- throw Error('Unknown tool.');
-}
-async function agentReply(userText){
- const messages=[{role:'system',content:SYSTEM},...history,{role:'user',content:userText}];
- for(let n=0;n<4;n++){
-  const response=await engine.chat.completions.create({messages,temperature:0.3,max_tokens:700});
-  const answer=String(response.choices?.[0]?.message?.content||'').trim();
-  let call=null;
-  try{const obj=JSON.parse(answer);if(obj&&typeof obj.tool==='string')call=obj}catch{}
-  if(!call||!$('agentMode').checked)return answer||'(No response returned.)';
-  let result;
-  try{result=await runTool(call.tool,call.arguments||{})}catch(e){result={error:e.message}}
-  messages.push({role:'assistant',content:answer});
-  messages.push({role:'user',content:'TOOL RESULT for '+call.tool+': '+JSON.stringify(result)+'\nUse this result to answer the original request. If it failed, explain that honestly.'});
-  say('Tool used: '+call.tool,'system');
- }
- return 'I reached the tool-call limit. Try splitting the request into smaller steps.';
-}
-async function loadModel(){
- if(loading||engine)return;loading=true;$('loadModel').disabled=true;$('model').disabled=true;status(false,'Loading browser AI…');$('progressBar').style.width='0%';
- try{
-  const webllm=await import('https://esm.run/@mlc-ai/web-llm');
-  const model=$('model').value;
-  engine=await webllm.CreateMLCEngine(model,{initProgressCallback:(p)=>{const pct=Math.max(0,Math.min(100,Math.round((p.progress||0)*100)));$('progressBar').style.width=pct+'%';$('progressText').textContent=p.text||('Loading model '+pct+'%');}});
-  status(true,'Browser AI ready');$('progressText').textContent='Model ready. Inference runs on this device.';$('hint').textContent='Ready · On-device inference';$('send').disabled=false;$('loadModel').textContent='Model loaded';say('Model loaded. COMMAND AI is ready.','system');
- }catch(e){engine=null;status(false,'Could not load model');$('progressText').textContent='Could not load the model: '+e.message+'. Try a WebGPU-enabled browser, free up memory, or choose the smaller model.';say('Model loading failed: '+e.message,'system');}
- finally{loading=false;$('loadModel').disabled=!!engine;$('model').disabled=!!engine;if(engine)$('loadModel').textContent='Model loaded';}
-}
-async function send(){
- const text=$('prompt').value.trim();if(!text||busy)return;if(!engine){say('Load an AI model first.','system');return}
- busy=true;$('send').disabled=true;say(text,'user');$('prompt').value='';const pending=say('Thinking…','assistant');
- try{const answer=await agentReply(text);pending.textContent=answer;history.push({role:'user',content:text},{role:'assistant',content:answer});if(history.length>24)history=history.slice(-24)}catch(e){pending.textContent='The model hit an error: '+e.message}
- finally{busy=false;$('send').disabled=!engine;$('prompt').focus()}
-}
-$('loadModel').addEventListener('click',loadModel);
-$('model').addEventListener('change',()=>{if(engine){say('To switch models, refresh the page and load the other model.','system')}});
-$('send').addEventListener('click',send);
-$('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
-$('clear').addEventListener('click',()=>{history=[];$('messages').replaceChildren();say('Conversation cleared.','system')});
-document.querySelectorAll('.sample').forEach(b=>b.addEventListener('click',()=>{$('prompt').value=b.dataset.prompt;$('prompt').focus()}));
-$('textFiles').addEventListener('change',async e=>{attachedFiles=[];for(const f of Array.from(e.target.files||[])){if(f.size>200000){say(f.name+' skipped: maximum file size is 200 KB.','system');continue}attachedFiles.push({name:f.name,content:await f.text()})}$('fileList').textContent=attachedFiles.length?attachedFiles.map(f=>f.name+' ('+f.content.length+' characters)').join('\n'):'No text files attached.';say(attachedFiles.length+' text file(s) made available to the agent.','system')});
-status(false,'Browser AI not loaded');
-</script>
-</body>
-</html>
+:root{color-scheme:dark;--bg:#080c12;--panel:#101722;--line:#253247;--text:#e8eef8;--muted:#91a0b5;--accent:#71e4c1}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a2d43,transparent 55%),var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}header{padding:18px 22px;border-bottom:1px solid var(--line);font-weight:800;letter-spacing:.15em}main{max-width:1100px;margin:auto;padding:24px 16px}.intro h1{font-size:clamp(30px,5vw,46px);line-height:1.1;margin:0 0 8px}.intro h1 span{color:var(--accent)}.muted{color:var(--muted);font-size:13px}.tabs,.buttons{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.btn{background:#172233;border:1px solid var(--line);border-radius:9px;padding:10px 13px;color:var(--text);font:inherit;cursor:pointer}.btn.active,.btn.primary{background:var(--accent);color:#06130f;border-color:var(--accent);font-weight:750}.btn:disabled{opacity:.45;cursor:not-allowed}.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.8fr);gap:15px}.panel{background:#101722e8;border:1px solid var(--line);border-radius:14px;overflow:hidden}.head{padding:13px 15px;border-bottom:1px solid var(--line);font-weight:750;display:flex;justify-content:space-between;gap:8px}.stage{position:relative;background:#030609;aspect-ratio:4/3;display:grid;place-items:center;overflow:hidden}.stage video{width:100%;height:100%;object-fit:contain;transform:scaleX(-1)}.stage canvas{position:absolute;inset:0;width:100%;height:100%}.placeholder{text-align:center;color:var(--muted);padding:24px}.placeholder b{display:block;color:var(--accent);font-size:38px}.body{padding:15px}.field{width:100%;background:#0a1018;border:1px solid var(--line);border-radius:9px;padding:10px;color:var(--text);font:inherit;margin:7px 0}.divider{height:1px;background:var(--line);margin:15px 0}.list{display:grid;gap:8px}.item{padding:10px;border:1px solid var(--line);border-radius:9px;background:#0b121c;overflow-wrap:anywhere}.small{font-size:12px;color:var(--muted)}.hidden{display:none!important}.progress{height:4px;background:#253247;margin:12px 0}.progress span{display:block;background:var(--accent);height:100%;width:0}.pill{font-size:11px;color:var(--muted)}@media(max-width:760px){.layout{grid-template-columns:1fr}header{padding:16px}}
+</style></head><body>
+<header>⌁ COMMAND VISION <span style="float:right;font-size:12px;letter-spacing:0;color:var(--muted)" id="status">Vision models unloaded</span></header>
+<main><section class="intro"><h1>Vision only.<br><span>No chatbot. No LLM.</span></h1><p class="muted">Choose a vision task. Models run in your browser; the camera feed is not uploaded by this page.</p></section>
+<nav class="tabs"><button class="btn active" data-mode="faces">Face detection & tracking</button><button class="btn" data-mode="objects">Object recognition</button></nav>
+<div class="layout"><section class="panel"><div class="head"><span id="task">FACE DETECTION</span><span class="pill" id="modelStatus">Model not loaded</span></div><div class="stage"><video id="video" autoplay muted playsinline class="hidden"></video><canvas id="canvas" class="hidden"></canvas><div id="placeholder" class="placeholder"><b>◎</b>Camera is off<br><span class="small">Start camera, then load the selected vision model.</span></div></div><div class="body"><div class="buttons"><button class="btn primary" id="start">Start camera</button><button class="btn" id="stop" disabled>Stop camera</button><button class="btn" id="load">Load vision model</button></div><div class="progress"><span id="bar"></span></div><p class="small" id="message">Only the selected vision model loads. Object detection uses a small MobileNet-based model.</p></div></section>
+<aside class="panel"><div class="head"><span id="sideTitle">DETECTED FACES</span><span class="pill" id="count">0 detected</span></div><div class="body"><section id="facePanel"><p class="small">Find faces and follow their positions between frames. Unknown faces can be given a local label after you confirm registration. No automatic enrollment.</p><div id="faces" class="list"><div class="small">No faces detected yet.</div></div><div class="divider"></div><label class="small" for="label">Register selected face (with permission)</label><input id="label" class="field" maxlength="40" placeholder="Person's chosen label"><button class="btn primary" id="register" disabled>Register selected face</button><div class="divider"></div><div class="small">Saved labels</div><div id="known" class="list" style="margin-top:8px"></div><button class="btn" id="forget" style="margin-top:10px">Forget all saved faces</button></section><section id="objectPanel" class="hidden"><p class="small">Recognizes common objects from a fixed category list, such as people, bottles, chairs, phones, and vehicles. This is not a general-purpose visual question-answering model.</p><div id="objects" class="list"><div class="small">No objects detected yet.</div></div></section><div class="divider"></div><p class="small">Models: face-api.js (face detection/descriptor matching) and COCO-SSD MobileNet (objects). Model files download when first used.</p></div></aside></div></main>
+<script>
+const $=id=>document.getElementById(id);let mode='faces',faceapi=null,objModel=null,stream=null,active=false,loop=null,ready={faces:false,objects:false},current=[],chosen=-1,known=[];
+try{known=JSON.parse(localStorage.getItem('commandVisionKnown')||'[]');if(!Array.isArray(known))known=[]}catch{known=[]}
+const faceBase='https://justadudewhohacks.github.io/face-api.js/models';
+function say(s){$('message').textContent=s}
+function state(s){$('status').textContent=s}
+function progress(n,s){$('bar').style.width=n+'%';say(s)}
+function save(){localStorage.setItem('commandVisionKnown',JSON.stringify(known));renderKnown()}
+function renderKnown(){const root=$('known');root.replaceChildren();for(const f of known){const d=document.createElement('div');d.className='item';d.textContent=f.name;const b=document.createElement('button');b.className='btn';b.textContent='Forget';b.style.float='right';b.onclick=()=>{known=known.filter(x=>x.id!==f.id);save()};d.append(b);root.append(d)}if(!known.length)root.innerHTML='<span class="small">No faces registered in this browser.</span>'}
+function dist(a,b){let n=0;for(let i=0;i<a.length;i++){let d=a[i]-b[i];n+=d*d}return Math.sqrt(n)}
+function match(desc){let best=null,score=Infinity;for(const f of known){const d=dist(desc,f.descriptor);if(d<score){score=d;best=f}}return best&&score<.48?best:null}
+function draw(items,objects=false){const v=$('video'),c=$('canvas'),r=v.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=r.width*d;c.height=r.height*d;const x=c.getContext('2d');x.scale(d,d);const sc=Math.min(r.width/v.videoWidth,r.height/v.videoHeight),ox=(r.width-v.videoWidth*sc)/2,oy=(r.height-v.videoHeight*sc)/2;x.lineWidth=2;x.font='13px system-ui';for(const it of items){let b,label;if(objects){b={x:it.bbox[0],y:it.bbox[1],width:it.bbox[2],height:it.bbox[3]};label=it.class+' '+Math.round(it.score*100)+'%'}else{b=it.detection.box;label=it.name||'Face'}const bx=ox+(v.videoWidth-b.x-b.width)*sc,by=oy+b.y*sc,bw=b.width*sc,bh=b.height*sc;x.strokeStyle='#71e4c1';x.fillStyle='#71e4c1';x.strokeRect(bx,by,bw,bh);const w=x.measureText(label).width+10;x.fillRect(bx,Math.max(0,by-22),w,21);x.fillStyle='#06130f';x.fillText(label,bx+5,Math.max(14,by-7))}}
+async function script(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=()=>no(Error('Library download failed'));document.head.append(s)})}
+async function load(){ $('load').disabled=true;try{if(mode==='faces'&&!ready.faces){state('Loading face vision model');progress(5,'Loading face detection library…');if(!window.faceapi)await script('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/build/face-api.min.js');faceapi=window.faceapi;progress(25,'Loading tiny face detector…');await faceapi.nets.tinyFaceDetector.loadFromUri(faceBase);progress(55,'Loading facial landmarks…');await faceapi.nets.faceLandmark68Net.loadFromUri(faceBase);progress(80,'Loading face descriptor model…');await faceapi.nets.faceRecognitionNet.loadFromUri(faceBase);ready.faces=true}
+if(mode==='objects'&&!ready.objects){state('Loading object vision model');progress(10,'Loading TensorFlow.js…');if(!window.tf)await script('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js');progress(35,'Loading COCO-SSD…');if(!window.cocoSsd)await script('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js');progress(60,'Loading lightweight MobileNet model…');objModel=await window.cocoSsd.load({base:'lite_mobilenet_v2'});ready.objects=true}
+$('modelStatus').textContent='Ready';state(mode==='faces'?'Face vision ready':'Object vision ready');progress(100,'Model ready. Running locally in your browser.');if(active)startLoop()}catch(e){state('Model load failed');progress(0,e.message+' Check your connection and try again.')}finally{$('load').disabled=false}}
+async function camera(){if(active)return;try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});$('video').srcObject=stream;await $('video').play();active=true;$('video').classList.remove('hidden');$('canvas').classList.remove('hidden');$('placeholder').classList.add('hidden');$('start').disabled=true;$('stop').disabled=false;state('Camera active');if(!ready[mode])await load();if(ready[mode])startLoop()}catch(e){state('Camera unavailable');say('Camera error: '+e.message+'. Use HTTPS and allow camera permission.')}}
+function stopLoop(){if(loop)clearTimeout(loop);loop=null}
+function stop(){active=false;stopLoop();if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$('video').srcObject=null;$('video').classList.add('hidden');$('canvas').classList.add('hidden');$('placeholder').classList.remove('hidden');$('start').disabled=false;$('stop').disabled=true;current=[];chosen=-1;renderFaces();state('Camera stopped')}
+function renderFaces(){const root=$('faces');root.replaceChildren();$('count').textContent=current.length+' detected';if(!current.length){root.innerHTML='<span class="small">No faces detected right now.</span>';$('register').disabled=true;return}current.forEach((f,i)=>{const b=document.createElement('button');b.className='btn';b.style.textAlign='left';b.textContent=(f.person?f.person.name:'Unknown face')+' · Face '+(i+1);b.onclick=()=>{chosen=i;renderFaces();$('register').disabled=!!f.person};if(i===chosen)b.style.borderColor='var(--accent)';root.append(b)})}
+async function scanFaces(){if(!active||mode!=='faces'||!ready.faces||$('video').readyState<2){loop=setTimeout(startLoop,200);return}try{const result=await faceapi.detectAllFaces($('video'),new faceapi.TinyFaceDetectorOptions({inputSize:224,scoreThreshold:.5})).withFaceLandmarks().withFaceDescriptors();current=result.map(f=>({detection:f.detection,descriptor:Array.from(f.descriptor),person:match(f.descriptor)}));draw(current.map(f=>({...f,name:f.person?.name||'Unknown face'})));if(chosen>=current.length)chosen=-1;renderFaces()}catch(e){say('Face detector error: '+e.message)}loop=setTimeout(startLoop,300)}
+async function scanObjects(){if(!active||mode!=='objects'||!ready.objects||$('video').readyState<2){loop=setTimeout(startLoop,200);return}try{const result=await objModel.detect($('video'),8,.45);draw(result,true);const root=$('objects');root.replaceChildren();$('count').textContent=result.length+' detected';if(!result.length)root.innerHTML='<span class="small">No common objects detected.</span>';for(const p of result){const d=document.createElement('div');d.className='item';d.textContent=p.class+' · '+Math.round(p.score*100)+'% confidence';root.append(d)}}catch(e){say('Object detector error: '+e.message)}loop=setTimeout(startLoop,600)}
+function startLoop(){stopLoop();if(!active)return;if(mode==='faces')scanFaces();else scanObjects()}
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));$('task').textContent=mode==='faces'?'FACE DETECTION & TRACKING':'OBJECT RECOGNITION';$('sideTitle').textContent=mode==='faces'?'DETECTED FACES':'OBJECTS IN VIEW';$('facePanel').classList.toggle('hidden',mode!=='faces');$('objectPanel').classList.toggle('hidden',mode!=='objects');$('modelStatus').textContent=ready[mode]?'Ready':'Model not loaded';if(active){stopLoop();if(!ready[mode])load();else startLoop()}});
+$('load').onclick=load;$('start').onclick=camera;$('stop').onclick=stop;
+$('register').onclick=()=>{if(chosen<0||!current[chosen]||current[chosen].person)return;const name=$('label').value.trim();if(!name){say('Enter a label first.');return}known.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2),name,descriptor:current[chosen].descriptor});save();$('label').value='';say('Saved a face template labelled '+name+' in this browser. Only register people who have agreed.');renderFaces()};
+$('forget').onclick=()=>{if(confirm('Erase every locally saved face template?')){known=[];save();renderFaces();say('Saved face templates erased.')}};
+renderKnown();state('Vision models unloaded');
+</script></body></html>
