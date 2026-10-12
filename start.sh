@@ -9,7 +9,7 @@ if ! command -v ollama >/dev/null 2>&1; then
   echo "Ollama was not found. Install/start Ollama first."
   exit 1
 fi
-if ! curl -fsS http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
+if ! python3 -c "import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:11434/api/tags\", timeout=2)" >/dev/null 2>&1; then
   echo "Starting Ollama service..."
   (ollama serve >/tmp/command-ai-ollama.log 2>&1 &)
   sleep 2
