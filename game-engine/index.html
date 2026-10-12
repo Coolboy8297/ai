@@ -61,6 +61,10 @@ window.addEventListener('unhandledrejection',e=>log('Unhandled promise rejection
 const savedConsole=console.error;console.error=(...args)=>{savedConsole(...args);log(args.map(String).join(' '),'error');};
 let renderer,scene,camera,orbit,gizmo,selectionOutline=null,selected=null,playing=false,playSnapshot=null,scriptOpen=false,history=[],historyIndex=-1,historyBusy=false,lastTime=performance.now(),frameCount=0,fpsFrames=0,moveKeys={},playCamera=null, snapEnabled=false, transformSpace='world', draggedObject=null,playPlayer=null,playYaw=0,playPitch=0,playVerticalVelocity=0,playGrounded=false;
 const objects=[],pickables=[],assets=[],loader=new GLTFLoader(),raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();
+// Studio simulation state must exist before startup creates its first objects.
+let forgeWorld={time:12,timeSpeed:1,weather:'clear',wind:0,quality:'balanced',sculptMode:'raise',sculptRadius:3,sculptStrength:.6,paintMode:false,paintColor:'#477a42'};
+let forgeSculptEnabled=false;
+let forgeGameState={inventory:[],quests:{},checkpoint:[0,0,3],lastInteract:0};
 const projectName=$('#projectName');
 function showToast(text){const t=$('#toast');t.textContent=text;t.style.display='block';setTimeout(()=>t.style.display='none',2300);}
 function closeMenus(){document.querySelectorAll('.dropdown.open').forEach(e=>e.classList.remove('open'));}
