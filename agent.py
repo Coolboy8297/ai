@@ -61,7 +61,7 @@ def run_tool(name, args):
             "uname -a": ["uname", "-a"], "df -h": ["df", "-h"],
             "free -h": ["free", "-h"], "uptime": ["uptime"],
             "python --version": ["python3", "--version"],
-            "ollama list": ["ollama", "list"], "git status": ["git", "-C", str(HOME), "status", "--short"],
+            "ollama list": ["ollama", "list"], "git status": ["git", "-C", str(ROOT), "status", "--short"],
         }
         if command not in allowed:
             raise ValueError("Command not on the safe allowlist. Allowed: " + ", ".join(allowed))
