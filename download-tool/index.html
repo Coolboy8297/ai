@@ -8,33 +8,34 @@
 <style>
 :root{color-scheme:dark;--bg:#080b14;--panel:#111827;--line:#293449;--text:#eef3ff;--muted:#9aa8c0;--accent:#78a9ff;--good:#6ee7b7;--bad:#fca5a5}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 0,#172746 0,transparent 55%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
-main{width:min(100%,680px)}.brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}.logo{display:grid;place-items:center;width:44px;height:44px;border:1px solid #43649a;border-radius:14px;background:#172b4b;color:var(--accent);font-size:22px;font-weight:800}.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}h1{font-size:clamp(30px,6vw,46px);line-height:1.08;letter-spacing:-.04em;margin:5px 0 10px}.sub{color:var(--muted);margin:0 0 26px}.panel{background:color-mix(in srgb,var(--panel) 94%,transparent);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,4vw,28px);box-shadow:0 24px 80px #0005}.field{display:block;font-weight:650;margin:0 0 8px}.urlrow{display:flex;gap:10px}.urlrow input,.filename{width:100%;min-width:0;border:1px solid #35435b;border-radius:12px;background:#090f1b;color:var(--text);padding:14px;font:inherit;outline:none}.urlrow input:focus,.filename:focus{border-color:var(--accent);box-shadow:0 0 0 3px #78a9ff22}.hint{color:var(--muted);font-size:13px;margin:8px 0 20px}.filename{margin-top:8px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}button,.linkbtn{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid transparent;border-radius:12px;padding:12px 16px;font:inherit;font-weight:750;text-decoration:none;cursor:pointer}.primary{background:var(--accent);color:#08111f}.secondary{background:#1a263a;border-color:#34435b;color:var(--text)}button:disabled{opacity:.55;cursor:wait}.status{margin-top:18px;padding:12px 14px;border-radius:10px;background:#0b1220;border:1px solid var(--line);color:var(--muted);overflow-wrap:anywhere;white-space:pre-wrap}.status.good{color:var(--good)}.status.bad{color:var(--bad)}.note{margin:18px 2px 0;color:var(--muted);font-size:13px}.note strong{color:#dce7ff}footer{text-align:center;color:#6f7e98;font-size:12px;margin-top:20px}@media(max-width:520px){.urlrow{flex-direction:column}.urlrow button{width:100%}}
+main{width:min(100%,720px)}.brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}.logo{display:grid;place-items:center;width:44px;height:44px;border:1px solid #43649a;border-radius:14px;background:#172b4b;color:var(--accent);font-size:22px;font-weight:800}.eyebrow{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}h1{font-size:clamp(30px,6vw,46px);line-height:1.08;letter-spacing:-.04em;margin:5px 0 10px}.sub{color:var(--muted);margin:0 0 26px}.panel{background:color-mix(in srgb,var(--panel) 94%,transparent);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,4vw,28px);box-shadow:0 24px 80px #0005}.field{display:block;font-weight:650;margin:0 0 8px}.urlrow{display:flex;gap:10px}.urlrow input,.filename{width:100%;min-width:0;border:1px solid #35435b;border-radius:12px;background:#090f1b;color:var(--text);padding:14px;font:inherit;outline:none}.urlrow input:focus,.filename:focus{border-color:var(--accent);box-shadow:0 0 0 3px #78a9ff22}.hint{color:var(--muted);font-size:13px;margin:8px 0 20px}.filename{margin-top:8px}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}button{display:inline-flex;justify-content:center;align-items:center;gap:8px;border:1px solid transparent;border-radius:12px;padding:12px 16px;font:inherit;font-weight:750;cursor:pointer}.primary{background:var(--accent);color:#08111f}.secondary{background:#1a263a;border-color:#34435b;color:var(--text)}button:disabled{opacity:.55;cursor:wait}.status{margin-top:18px;padding:12px 14px;border-radius:10px;background:#0b1220;border:1px solid var(--line);color:var(--muted);overflow-wrap:anywhere;white-space:pre-wrap}.status.good{color:var(--good)}.status.bad{color:var(--bad)}.note{margin:18px 2px 0;color:var(--muted);font-size:13px}.note strong{color:#dce7ff}footer{text-align:center;color:#6f7e98;font-size:12px;margin-top:20px}@media(max-width:560px){.urlrow{flex-direction:column}.urlrow button{width:100%}}
 </style>
 </head>
 <body>
 <main>
-  <div class="brand"><div class="logo">↓</div><div><div class="eyebrow">AI tools · utility</div><strong>DOWNLOAD TOOL</strong></div></div>
+  <div class="brand"><div class="logo">↓</div><div><div class="eyebrow">AI tools · utility</div><strong>DOWNLOAD TOOL 2.0</strong></div></div>
   <h1>Get a file from a link.</h1>
-  <p class="sub">Paste a direct file URL, choose a filename if you want, and try downloading it in your browser.</p>
+  <p class="sub">Built for direct links, including large files that are too big for a browser memory-based download.</p>
   <section class="panel">
-    <label class="field" for="url">Download link</label>
-    <div class="urlrow"><input id="url" type="url" inputmode="url" placeholder="https://example.com/file.zip" autocomplete="url"><button id="check" class="primary">Download</button></div>
-    <p class="hint">Use the direct link to the file, not just the webpage where it appears.</p>
-    <label class="field" for="filename">Save as (optional)</label>
-    <input class="filename" id="filename" type="text" placeholder="Leave blank to use the original filename">
-    <div class="actions"><button id="direct" class="secondary" type="button">Open link instead</button><button id="clear" class="secondary" type="button">Clear</button></div>
-    <div id="status" class="status" role="status" aria-live="polite">Ready. Paste a download link to begin.</div>
+    <label class="field" for="url">Direct download link</label>
+    <div class="urlrow"><input id="url" type="url" inputmode="url" placeholder="https://example.com/file.zip" autocomplete="url"><button id="native" class="primary" type="button">Download file</button></div>
+    <p class="hint">Paste the direct file URL. The recommended mode lets the file host and browser handle the transfer, so the whole file does not need to fit in this page's memory.</p>
+    <label class="field" for="filename">Save as (optional, fetch mode only)</label>
+    <input class="filename" id="filename" type="text" placeholder="Custom filename for browser-fetch mode">
+    <div class="actions"><button id="fetch" class="secondary" type="button">Try browser fetch</button><button id="open" class="secondary" type="button">Open link in new tab</button><button id="clear" class="secondary" type="button">Clear</button></div>
+    <div id="status" class="status" role="status" aria-live="polite">Ready. Paste a direct download link to begin.</div>
   </section>
-  <p class="note"><strong>Browser limitation:</strong> some file hosts block cross-origin downloads, require a login, or use temporary links. If that happens, use “Open link instead” or download from the host’s own page. This tool does not bypass access controls or school network restrictions.</p>
-  <footer>Runs in your browser · Your link is not sent to a separate server by this page</footer>
+  <p class="note"><strong>Know the limits:</strong> direct mode works best when the host serves a downloadable file. Some hosts show a webpage instead, require sign-in, or block access. Browser-fetch mode requires CORS permission and may use a lot of memory for large files. This tool does not bypass access controls, paywalls, or network restrictions.</p>
+  <footer>Runs in your browser · No separate proxy server · Use links you are authorized to download</footer>
 </main>
 <script>
 (() => {
   const urlInput = document.querySelector('#url');
   const filenameInput = document.querySelector('#filename');
   const status = document.querySelector('#status');
-  const downloadButton = document.querySelector('#check');
-  const directButton = document.querySelector('#direct');
+  const nativeButton = document.querySelector('#native');
+  const fetchButton = document.querySelector('#fetch');
+  const openButton = document.querySelector('#open');
   const clearButton = document.querySelector('#clear');
 
   function setStatus(message, type = '') {
@@ -58,12 +59,28 @@ main{width:min(100%,680px)}.brand{display:flex;align-items:center;gap:12px;margi
   function safeName(name) {
     return name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_').trim().slice(0, 180) || 'download';
   }
-  async function download() {
+  function nativeDownload() {
     let target;
     try { target = getUrl(); }
     catch (error) { setStatus(error.message, 'bad'); return; }
-    downloadButton.disabled = true;
-    setStatus('Connecting to the file host…');
+    // Navigate directly to the file host: avoids fetch/CORS and in-memory blob limits.
+    // Cross-origin filenames are controlled by the host's Content-Disposition header.
+    const anchor = document.createElement('a');
+    anchor.href = target.href;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener noreferrer';
+    anchor.referrerPolicy = 'no-referrer';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setStatus('Sent the link to your browser in a new tab. The host may start the download automatically or display its own page.', 'good');
+  }
+  async function browserFetch() {
+    let target;
+    try { target = getUrl(); }
+    catch (error) { setStatus(error.message, 'bad'); return; }
+    fetchButton.disabled = true;
+    setStatus('Fetching the file… Large files may use substantial memory in this mode.');
     try {
       const response = await fetch(target.href, { mode: 'cors', credentials: 'omit' });
       if (!response.ok) throw new Error('The server responded with HTTP ' + response.status + '.');
@@ -77,25 +94,29 @@ main{width:min(100%,680px)}.brand{display:flex;align-items:center;gap:12px;margi
       anchor.click();
       anchor.remove();
       setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
-      setStatus('Download started: ' + anchor.download + ' (' + (blob.size / 1024 / 1024).toFixed(2) + ' MB).', 'good');
+      setStatus('Browser download started: ' + anchor.download + ' (' + (blob.size / 1024 / 1024).toFixed(2) + ' MB).', 'good');
     } catch (error) {
       const detail = error instanceof TypeError
-        ? 'The host may block browser downloads (CORS), or the link may require sign-in. Try “Open link instead” or use the host’s official download page.'
+        ? 'The host may block browser fetch (CORS). Try “Download file” to let the browser contact the host directly.'
         : error.message;
-      setStatus('Could not download through this page. ' + detail, 'bad');
+      setStatus('Browser-fetch download failed. ' + detail, 'bad');
     } finally {
-      downloadButton.disabled = false;
+      fetchButton.disabled = false;
     }
   }
   function openDirect() {
-    try { window.open(getUrl().href, '_blank', 'noopener,noreferrer'); setStatus('Opened the link in a new tab. If it is a file, your browser may download it automatically.'); }
-    catch (error) { setStatus(error.message, 'bad'); }
+    try {
+      const target = getUrl();
+      window.open(target.href, '_blank', 'noopener,noreferrer');
+      setStatus('Opened the link in a new tab. The host may start a download or show a webpage.');
+    } catch (error) { setStatus(error.message, 'bad'); }
   }
-  downloadButton.addEventListener('click', download);
-  directButton.addEventListener('click', openDirect);
-  clearButton.addEventListener('click', () => { urlInput.value = ''; filenameInput.value = ''; setStatus('Ready. Paste a download link to begin.'); urlInput.focus(); });
-  urlInput.addEventListener('keydown', event => { if (event.key === 'Enter') download(); });
-  filenameInput.addEventListener('keydown', event => { if (event.key === 'Enter') download(); });
+  nativeButton.addEventListener('click', nativeDownload);
+  fetchButton.addEventListener('click', browserFetch);
+  openButton.addEventListener('click', openDirect);
+  clearButton.addEventListener('click', () => { urlInput.value = ''; filenameInput.value = ''; setStatus('Ready. Paste a direct download link to begin.'); urlInput.focus(); });
+  urlInput.addEventListener('keydown', event => { if (event.key === 'Enter') nativeDownload(); });
+  filenameInput.addEventListener('keydown', event => { if (event.key === 'Enter') browserFetch(); });
 })();
 </script>
 </body>
