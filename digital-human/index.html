@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PROJECT MIRROR — Digital Human Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#080b12;--panel:#101725;--line:#26334a;--cyan:#7ce8ff;--muted:#91a0b8;--text:#edf5ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 55% 5%,#17283a 0%,#080b12 58%);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,sans-serif;min-height:100vh}
+header{height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #253047;background:#090e18d9;position:sticky;top:0;z-index:4;backdrop-filter:blur(14px)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.16em}.orb{width:30px;height:30px;border-radius:50%;border:1px solid var(--cyan);box-shadow:0 0 22px #4ad8ff55,inset 0 0 12px #4ad8ff44;position:relative}.orb:after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.24em;font-weight:600}
+.status{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:12px}.dot{width:7px;height:7px;border-radius:50%;background:#6e7a8c}.dot.on{background:#7df2b1;box-shadow:0 0 10px #7df2b177}
+main{max-width:1500px;margin:auto;padding:22px;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px}
+.stagePanel,.panel{border:1px solid var(--line);background:linear-gradient(150deg,#131d2cdd,#0d1320f5);border-radius:16px;overflow:hidden;box-shadow:0 18px 50px #0003}
+.stageHead{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.eyebrow{font-size:10px;color:var(--cyan);letter-spacing:.19em;font-weight:800}.stageHead h1{font-size:16px;margin:3px 0 0}.tag{font-size:10px;padding:5px 8px;border:1px solid #2c5262;color:var(--cyan);border-radius:6px;letter-spacing:.1em}
+#stage{height:min(70vh,720px);min-height:430px;position:relative;background:radial-gradient(ellipse at 50% 36%,#26394b 0%,#121d2c 38%,#090e17 78%)}#viewport{width:100%;height:100%;display:block}
+.corner{position:absolute;color:#7e9aaf;font:10px ui-monospace,monospace;letter-spacing:.12em}.tl{top:15px;left:16px}.tr{top:15px;right:16px;text-align:right}.bl{bottom:15px;left:16px}.br{bottom:15px;right:16px}
+#cam{display:none;position:absolute;width:155px;right:15px;bottom:15px;border:1px solid #456077;border-radius:9px;transform:scaleX(-1);opacity:.86;background:#000}
+.placeholder{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;text-align:center;color:#9cb0c5}.placeholder.hidden{display:none}.placeholder strong{display:block;font-size:13px;color:#e4f4ff;margin-bottom:5px}.placeholder p{max-width:300px;margin:0 auto;font-size:12px}
+.under{display:flex;justify-content:space-between;gap:12px;padding:13px 17px;color:var(--muted);font-size:11px;border-top:1px solid var(--line)}.under span{display:flex;gap:8px;align-items:center}
+.side{display:flex;flex-direction:column;gap:14px}.panel{padding:17px}.panel h2{font-size:13px;letter-spacing:.04em;margin:0 0 13px}.sectionNote{font-size:11px;color:var(--muted);margin:-7px 0 13px}
+button,.fileButton{font:inherit;cursor:pointer;border-radius:9px;border:1px solid #33445d;background:#1a273a;color:var(--text);padding:10px 12px;transition:.15s}button:hover,.fileButton:hover{border-color:var(--cyan);background:#1c3445}button.primary{background:var(--cyan);color:#06131a;border-color:var(--cyan);font-weight:800}button.primary:hover{background:#b1f1ff}button:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions .primary{grid-column:1/-1}.full{width:100%}.fileButton{display:block;text-align:center;width:100%;margin-top:8px}
+input[type=file]{display:none}.field{margin:13px 0}.fieldHead{display:flex;justify-content:space-between;color:#dce9f7;font-size:12px;margin-bottom:7px}.fieldHead output{color:var(--cyan);font-variant-numeric:tabular-nums}input[type=range]{width:100%;accent-color:var(--cyan)}
+.checkrow{display:flex;align-items:center;gap:9px;color:#c8d5e6;font-size:12px;margin:12px 0}.checkrow input{accent-color:var(--cyan)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:#0b111c;border:1px solid #202d40;border-radius:9px;padding:10px}.metric small{display:block;color:var(--muted);font-size:10px}.metric strong{display:block;font-size:18px;margin-top:3px;font-variant-numeric:tabular-nums}
+#message{font-size:11px;line-height:1.5;color:#aabbd0;margin-top:11px;min-height:33px}.warning{color:#f6c985!important}.divider{height:1px;background:var(--line);margin:14px 0}.foot{max-width:1500px;margin:0 auto;padding:0 22px 24px;color:#71829a;font-size:11px}
+@media(max-width:950px){main{grid-template-columns:1fr;padding:12px}#stage{height:58vh;min-height:360px}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.brand{letter-spacing:.08em}.foot{padding:0 12px 18px}}@media(max-width:560px){header{padding:0 13px;height:60px}.status{font-size:10px}.side{display:flex}.panel{padding:14px}#stage{min-height:340px}.under{font-size:10px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><span class="orb"></span><div>PROJECT MIRROR<small>DIGITAL HUMAN STUDIO · ALPHA 0.1</small></div></div><div class="status"><span id="statusDot" class="dot"></span><span id="statusText">SYSTEM IDLE</span></div></header>
+<main>
+<section class="stagePanel">
+ <div class="stageHead"><div><div class="eyebrow">LIVE AVATAR STAGE</div><h1>Digital Human Preview</h1></div><span class="tag">REAL-TIME 3D</span></div>
+ <div id="stage"><canvas id="viewport"></canvas><div class="corner tl">CAM 01 / PORTRAIT</div><div class="corner tr" id="trackingLabel">TRACKING: OFF<br>FPS: --</div><div class="corner bl">PROJECT MIRROR // AVATAR CORE</div><div class="corner br" id="avatarLabel">AVATAR: PROCEDURAL</div><video id="cam" autoplay playsinline muted></video><div class="placeholder" id="placeholder"><div><strong>AVATAR CORE READY</strong><p>Start face tracking to drive the 3D head with your webcam. Load a rigged GLB/GLTF avatar for a more realistic human.</p></div></div></div>
+ <div class="under"><span><i class="dot" id="faceDot"></i><span id="faceState">Face landmark engine offline</span></span><span>Camera frames are processed locally in this browser.</span></div>
+</section>
+<aside class="side">
+ <section class="panel"><h2>01 / TRACKING CONTROL</h2><p class="sectionNote">Allow camera access to start live tracking.</p><div class="actions"><button class="primary" id="startBtn">Start tracking</button><button id="stopBtn" disabled>Stop</button></div><label class="checkrow"><input id="showCam" type="checkbox" checked> Show webcam preview</label><label class="checkrow"><input id="smooth" type="checkbox" checked> Smooth head movement</label><div id="message">Ready. Camera access requires HTTPS and your permission.</div></section>
+ <section class="panel"><h2>02 / AVATAR MODEL</h2><p class="sectionNote">Use a rigged 3D human model in GLB or GLTF format.</p><label class="fileButton" for="modelFile">Load 3D avatar (.glb / .gltf)</label><input id="modelFile" type="file" accept=".glb,.gltf,model/gltf-binary,model/gltf+json"><button class="full" id="resetAvatar" style="margin-top:8px">Reset preview avatar</button><div class="divider"></div><div style="font-size:11px;color:var(--muted)">For expression animation, choose a model with facial blendshapes / morph targets. Head tracking works with most models.</div></section>
+ <section class="panel"><h2>03 / LIVE TELEMETRY</h2><div class="metrics"><div class="metric"><small>FACE DETECTED</small><strong id="mFace">NO</strong></div><div class="metric"><small>HEAD YAW</small><strong id="mYaw">0°</strong></div><div class="metric"><small>HEAD PITCH</small><strong id="mPitch">0°</strong></div><div class="metric"><small>MOUTH OPEN</small><strong id="mMouth">0%</strong></div></div></section>
+ <section class="panel"><h2>04 / AVATAR ADJUSTMENT</h2><div class="field"><div class="fieldHead"><label for="scale">Avatar scale</label><output id="scaleOut">1.00×</output></div><input id="scale" type="range" min=".65" max="1.6" value="1" step=".05"></div><div class="field"><div class="fieldHead"><label for="sensitivity">Head sensitivity</label><output id="sensOut">1.00×</output></div><input id="sensitivity" type="range" min=".4" max="1.8" value="1" step=".1"></div><div class="field"><div class="fieldHead"><label for="light">Studio lighting</label><output id="lightOut">75%</output></div><input id="light" type="range" min="20" max="100" value="75" step="5"></div><button class="full" id="centerBtn">Re-center head pose</button></section>
+</aside>
+</main>
+<div class="foot">PROJECT MIRROR is an experimental browser-based prototype. Webcam frames are not uploaded by this app. Imported avatar files stay in this browser session. Tracking quality depends on lighting and the camera.</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const $=id=>document.getElementById(id);
+const canvas=$('viewport'),stage=$('stage'),video=$('cam');
+const scene=new THREE.Scene();scene.background=new THREE.Color('#0d1623');
+const camera=new THREE.PerspectiveCamera(34,1,.1,100);camera.position.set(0,0.25,5.7);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;
+scene.add(new THREE.HemisphereLight(0xb9dcff,0x49382f,2.0));
+const key=new THREE.DirectionalLight(0xffe0c2,3.2);key.position.set(-3,4,5);scene.add(key);
+const rim=new THREE.DirectionalLight(0x4bdcff,2.6);rim.position.set(3,2,-3);scene.add(rim);
+const fill=new THREE.PointLight(0x7b9dff,1.5,12);fill.position.set(2,0,4);scene.add(fill);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(2.8,64),new THREE.MeshBasicMaterial({color:0x132435,transparent:true,opacity:.75}));floor.rotation.x=-Math.PI/2;floor.position.y=-1.8;scene.add(floor);
+const grid=new THREE.GridHelper(8,32,0x294a60,0x172b3d);grid.position.y=-1.78;scene.add(grid);
+let avatar=new THREE.Group(),modelRoot=null,faceLandmarker=null,stream=null,tracking=false,lastVideoTime=-1,frameCount=0,fpsStart=performance.now(),fps=0,latest={},centerYaw=0,centerPitch=0,headTarget={x:0,y:0},headCurrent={x:0,y:0},morphTargets=[];
+scene.add(avatar);
+function mat(color,roughness=.65,metalness=0){return new THREE.MeshStandardMaterial({color,roughness,metalness})}
+function ellipsoid(parent,name,pos,scale,material){const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,40,32),material);mesh.name=name;mesh.position.set(...pos);mesh.scale.set(...scale);parent.add(mesh);return mesh}
+function makeFallback(){
+ avatar.clear();modelRoot=null;morphTargets=[];
+ const skin=mat('#d6a17e',.53),skinLight=mat('#e6b694',.5),shadowSkin=mat('#ad755b',.65),hair=mat('#30241f',.8),brow=mat('#49312a',.85),white=mat('#f5f0e8',.3),iris=mat('#4d827e',.32),pupil=mat('#101922',.2),lip=mat('#985c58',.48),dark=mat('#111923',.55);
+ const head=new THREE.Group();head.name='Head';avatar.add(head);
+ ellipsoid(head,'Skull',[0,.35,0],[.78,1.02,.66],skin);
+ ellipsoid(head,'Jaw',[0,-.15,.02],[.59,.57,.58],skin);
+ ellipsoid(head,'EarL',[-.77,.22,0],[.14,.25,.12],skinLight);ellipsoid(head,'EarR',[.77,.22,0],[.14,.25,.12],skinLight);
+ // cheeks and nose bridge
+ ellipsoid(head,'CheekL',[-.37,.02,.48],[.27,.24,.19],skinLight);ellipsoid(head,'CheekR',[.37,.02,.48],[.27,.24,.19],skinLight);
+ ellipsoid(head,'NoseBridge',[0,.02,.59],[.14,.3,.16],skinLight);ellipsoid(head,'NoseTip',[0,-.13,.7],[.19,.13,.15],skinLight);
+ ellipsoid(head,'NostrilL',[-.095,-.2,.69],[.045,.025,.02],shadowSkin);ellipsoid(head,'NostrilR',[.095,-.2,.69],[.045,.025,.02],shadowSkin);
+ for(const s of [-1,1]){
+  ellipsoid(head,'EyeSocket'+s,[s*.29,.31,.535],[.235,.145,.09],shadowSkin);
+  ellipsoid(head,'EyeWhite'+s,[s*.29,.31,.59],[.185,.095,.065],white);
+  ellipsoid(head,'Iris'+s,[s*.29,.31,.647],[.061,.065,.026],iris);
+  ellipsoid(head,'Pupil'+s,[s*.29,.31,.668],[.029,.037,.015],pupil);
+  ellipsoid(head,'Brow'+s,[s*.29,.49,.57],[.22,.055,.08],brow).rotation.z=s*-.08;
+ }
+ const mouth=ellipsoid(head,'Mouth',[0,-.37,.572],[.235,.055,.045],lip);morphTargets.push({mesh:mouth,baseY:.055});
+ ellipsoid(head,'UpperLip',[0,-.34,.585],[.22,.035,.038],skinLight);
+ // swept hair cap and side locks
+ const cap=ellipsoid(head,'HairCap',[0,1.02,-.035],[.77,.43,.68],hair);cap.rotation.x=-.08;
+ ellipsoid(head,'HairFringe',[-.1,.79,.48],[.48,.19,.22],hair).rotation.z=-.22;
+ ellipsoid(head,'HairSideL',[-.68,.53,.04],[.14,.46,.43],hair);ellipsoid(head,'HairSideR',[.68,.51,.02],[.14,.43,.4],hair);
+ // neck, shoulders, shirt
+ ellipsoid(avatar,'Neck',[0,-.75,-.03],[.25,.45,.26],skin);
+ ellipsoid(avatar,'Shoulders',[0,-1.23,-.1],[.93,.46,.43],mat('#263e58',.78));
+ ellipsoid(avatar,'ShirtCollar',[0,-.91,.23],[.32,.23,.12],mat('#e2e8ed',.72));
+ head.position.y=.12;head.userData.isHead=true;avatar.userData.head=head;avatar.scale.setScalar(Number($('scale').value));avatar.position.y=-.05;$('avatarLabel').textContent='AVATAR: PROCEDURAL';
+}
+makeFallback();
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(stage);resize();
+function setMessage(t,warning=false){$('message').textContent=t;$('message').classList.toggle('warning',warning)}
+function setStatus(on,text){$('statusDot').classList.toggle('on',on);$('statusText').textContent=text;$('faceDot').classList.toggle('on',on&&!!latest.face);$('faceState').textContent=on?(latest.face?'Face landmarks active':'Camera active · finding face'):'Face landmark engine offline'}
+async function initLandmarker(){
+ if(faceLandmarker)return faceLandmarker;
+ setMessage('Loading face landmark model…');
+ const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21/vision_bundle.mjs');
+ const files=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.21/wasm');
+ faceLandmarker=await vision.FaceLandmarker.createFromOptions(files,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',delegate:'GPU'},runningMode:'VIDEO',numFaces:1,outputFaceBlendshapes:true,outputFacialTransformationMatrixes:true});
+ return faceLandmarker;
+}
+async function start(){
+ if(tracking)return;
+ try{
+  $('startBtn').disabled=true;setMessage('Requesting camera permission…');
+  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480}},audio:false});video.srcObject=stream;await video.play();
+  $('cam').style.display=$('showCam').checked?'block':'none';
+  await initLandmarker();tracking=true;lastVideoTime=-1;setStatus(true,'TRACKING ACTIVE');$('stopBtn').disabled=false;$('placeholder').classList.add('hidden');setMessage('Tracking active. Move your head naturally; use Re-center if the pose drifts.');requestAnimationFrame(trackLoop);
+ }catch(e){$('startBtn').disabled=false;setStatus(false,'SYSTEM IDLE');setMessage((e.name==='NotAllowedError'?'Camera permission was denied. Allow camera access in your browser settings.':e.message||'Unable to start tracking.')+' You can still load a 3D avatar.',true);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+}
+function stop(){tracking=false;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;video.style.display='none';$('startBtn').disabled=false;$('stopBtn').disabled=true;latest={};setStatus(false,'SYSTEM IDLE');$('trackingLabel').innerHTML='TRACKING: OFF<br>FPS: --';$('mFace').textContent='NO';$('mYaw').textContent='0°';$('mPitch').textContent='0°';$('mMouth').textContent='0%';setMessage('Tracking stopped.');}
+function trackLoop(now){
+ if(!tracking)return;
+ if(video.readyState>=2&&video.currentTime!==lastVideoTime){lastVideoTime=video.currentTime;
+  try{const result=faceLandmarker.detectForVideo(video,now);const faces=result.faceLandmarks||[];latest.face=faces.length>0;
+   if(faces.length){const lm=faces[0],left=lm[234],right=lm[454],top=lm[10],bottom=lm[152],nose=lm[1];const cx=(left.x+right.x)/2,cy=(top.y+bottom.y)/2;let yaw=(nose.x-cx)/Math.max(.001,right.x-left.x);let pitch=(nose.y-cy)/Math.max(.001,bottom.y-top.y);headTarget.y=THREE.MathUtils.clamp(yaw*3.3,-.8,.8)-centerYaw;headTarget.x=THREE.MathUtils.clamp((pitch-.05)*3.0,-.55,.55)-centerPitch;
+    const cats=result.faceBlendshapes?.[0]?.categories||[];const val=n=>cats.find(c=>c.categoryName===n)?.score||0;latest.mouth=val('jawOpen');latest.blinkL=val('eyeBlinkLeft');latest.blinkR=val('eyeBlinkRight');latest.smile=val('mouthSmileLeft')+val('mouthSmileRight');
+    $('mFace').textContent='YES';$('mYaw').textContent=Math.round(headTarget.y*57.3)+'°';$('mPitch').textContent=Math.round(headTarget.x*57.3)+'°';$('mMouth').textContent=Math.round(latest.mouth*100)+'%';setStatus(true,'TRACKING ACTIVE');applyMorphs(cats);
+   }else{latest.face=false;$('mFace').textContent='NO';setStatus(true,'SEARCHING FOR FACE')}
+   frameCount++;if(now-fpsStart>1000){fps=Math.round(frameCount*1000/(now-fpsStart));frameCount=0;fpsStart=now;$('trackingLabel').innerHTML='TRACKING: ON<br>FPS: '+fps}
+  }catch(e){setMessage('Face tracking error: '+e.message,true)}
+ }
+ requestAnimationFrame(trackLoop);
+}
+function applyMorphs(cats){if(!modelRoot)return;const names={jawOpen:['jawOpen','mouthOpen','viseme_aa'],eyeBlinkLeft:['eyeBlinkLeft','blinkLeft'],eyeBlinkRight:['eyeBlinkRight','blinkRight'],mouthSmileLeft:['mouthSmileLeft','smileLeft'],mouthSmileRight:['mouthSmileRight','smileRight']};modelRoot.traverse(o=>{if(!o.isMesh||!o.morphTargetDictionary||!o.morphTargetInfluences)return;for(const [cat,aliases] of Object.entries(names)){const score=cats.find(c=>c.categoryName===cat)?.score||0;for(const alias of aliases){const idx=Object.keys(o.morphTargetDictionary).find(k=>k.toLowerCase()===alias.toLowerCase());if(idx!==undefined)o.morphTargetInfluences[o.morphTargetDictionary[idx]]=score}}})}
+$('startBtn').addEventListener('click',start);$('stopBtn').addEventListener('click',stop);
+$('showCam').addEventListener('change',()=>video.style.display=tracking&&$('showCam').checked?'block':'none');
+$('scale').addEventListener('input',e=>{$('scaleOut').textContent=Number(e.target.value).toFixed(2)+'×';avatar.scale.setScalar(Number(e.target.value))});
+$('sensitivity').addEventListener('input',e=>$('sensOut').textContent=Number(e.target.value).toFixed(2)+'×');
+$('light').addEventListener('input',e=>{$('lightOut').textContent=e.target.value+'%';key.intensity=3.2*e.target.value/75;rim.intensity=2.6*e.target.value/75});
+$('centerBtn').addEventListener('click',()=>{centerYaw=headTarget.y;centerPitch=headTarget.x;headTarget={x:0,y:0};setMessage('Head pose re-centered.')});
+$('resetAvatar').addEventListener('click',()=>{if(modelRoot){avatar.remove(modelRoot);modelRoot=null}makeFallback();setMessage('Procedural preview avatar restored.')});
+$('modelFile').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{setMessage('Loading avatar model…');const url=URL.createObjectURL(file);const loader=new GLTFLoader();const gltf=await loader.loadAsync(url);if(modelRoot)avatar.remove(modelRoot);avatar.clear();modelRoot=gltf.scene;const box=new THREE.Box3().setFromObject(modelRoot),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());modelRoot.position.sub(center);const max=Math.max(size.x,size.y,size.z)||1;modelRoot.scale.setScalar(2.6/max);modelRoot.position.y=-.2;avatar.add(modelRoot);avatar.scale.setScalar(Number($('scale').value));avatar.userData.head=null;$('avatarLabel').textContent='AVATAR: '+file.name.slice(0,18);URL.revokeObjectURL(url);setMessage('Avatar loaded. Head rotation tracking is active; facial animation depends on the model having compatible morph targets.');}catch(err){setMessage('Could not load this model: '+err.message,true)}});
+function animate(){requestAnimationFrame(animate);const sens=Number($('sensitivity').value),smooth=$('smooth').checked?.13:1;headCurrent.x+=(headTarget.x*sens-headCurrent.x)*smooth;headCurrent.y+=(headTarget.y*sens-headCurrent.y)*smooth;
+ if(avatar.userData.head){avatar.userData.head.rotation.x=headCurrent.x;avatar.userData.head.rotation.y=headCurrent.y;if(morphTargets[0])morphTargets[0].mesh.scale.y=.055+latest.mouth*.14}
+ else if(modelRoot){modelRoot.rotation.y=headCurrent.y;modelRoot.rotation.x=headCurrent.x}
+ if(!tracking){avatar.rotation.y=Math.sin(performance.now()*.00025)*.035}
+ renderer.render(scene,camera)}animate();
+window.addEventListener('beforeunload',()=>{if(stream)stream.getTracks().forEach(t=>t.stop())});
+</script>
+</body></html>
