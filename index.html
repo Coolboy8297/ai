@@ -2,58 +2,107 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#090d14"><title>COMMAND AI</title>
+<meta name="theme-color" content="#090d14">
+<meta name="description" content="COMMAND AI — a browser-based AI assistant that runs open models on your device. No account or API key required.">
+<title>COMMAND AI — Browser AI</title>
 <style>
-:root{color-scheme:dark;--bg:#090d14;--panel:#101722;--line:#253247;--text:#e8eef8;--muted:#8c9bb0;--accent:#71e4c1;--blue:#8aa8ff}
+:root{color-scheme:dark;--bg:#080c12;--panel:#101722;--line:#253247;--text:#e8eef8;--muted:#91a0b5;--accent:#71e4c1;--blue:#8aa8ff;--warn:#ffc879}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1a2d43 0,transparent 55%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
-header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;background:#090d14eF;backdrop-filter:blur(12px);z-index:2}
+header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;background:#090d14ed;backdrop-filter:blur(12px);z-index:3}
 .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.16em}.mark{width:30px;height:30px;border:2px solid var(--accent);border-radius:9px;display:grid;place-items:center;color:var(--accent);font-size:17px}
 .status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}.dot{width:8px;height:8px;background:#f0b45c;border-radius:50%}.dot.ok{background:var(--accent)}
-main{max-width:1050px;margin:0 auto;padding:28px 18px 40px}.intro h1{font-size:clamp(28px,5vw,43px);line-height:1.1;margin:0 0 10px;letter-spacing:-.04em}.intro h1 span{color:var(--accent)}.intro p{margin:0;color:var(--muted)}
-.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:16px;margin-top:24px}.panel{border:1px solid var(--line);background:#101722e8;border-radius:16px;overflow:hidden}.side{padding:16px}.label{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:700;margin:2px 0 10px}.field{width:100%;background:#0b111a;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:10px;font:inherit}.btn{border:1px solid var(--line);background:#172233;color:var(--text);padding:9px 11px;border-radius:9px;cursor:pointer;font:inherit}.btn:hover{border-color:var(--accent)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#06130f;font-weight:750}.btnrow{display:flex;gap:8px;flex-wrap:wrap}.side .btn{width:100%;text-align:left;margin:3px 0}.small{font-size:12px;color:var(--muted);line-height:1.45}.chat{display:flex;flex-direction:column;min-height:590px}.chathead{padding:14px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.chathead strong{font-size:14px}.messages{padding:18px;display:flex;flex-direction:column;gap:14px;flex:1;min-height:350px;max-height:58vh;overflow:auto}.msg{max-width:90%;padding:12px 14px;border:1px solid var(--line);border-radius:13px;white-space:pre-wrap;overflow-wrap:anywhere}.msg.user{align-self:flex-end;background:#17332f;border-color:#27564e}.msg.assistant{align-self:flex-start;background:#141e2b}.msg.system{align-self:center;color:var(--muted);font-size:12px;border:0;text-align:center}.composer{padding:13px;border-top:1px solid var(--line)}textarea{width:100%;resize:vertical;min-height:68px;max-height:180px;background:#0a1018;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;outline:none}textarea:focus,.field:focus{border-color:var(--accent)}.composebottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}.preview{max-width:100%;max-height:200px;border-radius:10px;margin-top:8px}.toolbox{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.toolbox .btn{font-size:12px}.hidden{display:none!important}#camera{width:100%;border-radius:10px;margin-top:10px;background:#05080c}.divider{height:1px;background:var(--line);margin:14px 0}
+main{max-width:1120px;margin:0 auto;padding:28px 18px 40px}.intro h1{font-size:clamp(28px,5vw,43px);line-height:1.1;margin:0 0 10px;letter-spacing:-.04em}.intro h1 span{color:var(--accent)}.intro p{margin:0;color:var(--muted)}
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;margin-top:24px}.panel{border:1px solid var(--line);background:#101722e8;border-radius:16px;overflow:hidden}.side{padding:16px}.label{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:700;margin:2px 0 10px}.field{width:100%;background:#0b111a;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:10px;font:inherit}.btn{border:1px solid var(--line);background:#172233;color:var(--text);padding:9px 11px;border-radius:9px;cursor:pointer;font:inherit}.btn:hover{border-color:var(--accent)}.btn:disabled{opacity:.5;cursor:wait}.btn.primary{background:var(--accent);border-color:var(--accent);color:#06130f;font-weight:750}.btnrow{display:flex;gap:8px;flex-wrap:wrap}.side .btn.full{width:100%;text-align:left;margin:3px 0}.small{font-size:12px;color:var(--muted);line-height:1.5}.chat{display:flex;flex-direction:column;min-height:590px}.chathead{padding:14px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.chathead strong{font-size:14px}.messages{padding:18px;display:flex;flex-direction:column;gap:14px;flex:1;min-height:350px;max-height:58vh;overflow:auto}.msg{max-width:92%;padding:12px 14px;border:1px solid var(--line);border-radius:13px;white-space:pre-wrap;overflow-wrap:anywhere}.msg.user{align-self:flex-end;background:#17332f;border-color:#27564e}.msg.assistant{align-self:flex-start;background:#141e2b}.msg.system{align-self:center;color:var(--muted);font-size:12px;border:0;text-align:center}.composer{padding:13px;border-top:1px solid var(--line)}textarea{width:100%;resize:vertical;min-height:68px;max-height:180px;background:#0a1018;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;outline:none}textarea:focus,.field:focus{border-color:var(--accent)}.composebottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}.divider{height:1px;background:var(--line);margin:14px 0}.notice{padding:10px;border:1px solid #3a4a5f;border-radius:10px;background:#0c1420;margin-top:10px}.progress{height:5px;border-radius:9px;background:#202b3a;overflow:hidden;margin:9px 0}.progress span{display:block;width:0;height:100%;background:var(--accent);transition:width .2s}.tag{display:inline-block;padding:3px 7px;border:1px solid var(--line);border-radius:20px;font-size:11px;color:var(--muted);margin:3px 3px 3px 0}.toolresult{font-size:12px;color:var(--accent)}.filelist{margin:7px 0;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:760px){.layout{grid-template-columns:1fr}.side{order:2}.chat{min-height:65vh}.messages{max-height:55vh}header{padding:0 14px}.intro p{max-width:42ch}}
 </style>
 </head>
 <body>
-<header><div class="brand"><div class="mark">›</div> COMMAND AI</div><div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Checking local AI…</span></div></header>
-<main><section class="intro"><h1>Give a command.<br><span>Get it done.</span></h1><p>A modular local AI assistant with vision, tool use, and Ollama models running on your computer.</p></section>
-<div class="layout"><aside class="panel side">
-<div class="label">LOCAL COMPANION</div><input id="endpoint" class="field" value="http://127.0.0.1:8765" aria-label="Local companion URL"><button id="connect" class="btn primary">Connect to COMMAND AI</button>
-<div class="label" style="margin-top:17px">MODEL</div><select id="model" class="field" aria-label="Model"><option value="">Connect to load models</option></select>
-<div class="small" id="connectionNote">Run ./start.sh in the project folder, then use http://127.0.0.1:8765. Models stay on your computer.</div>
-<div class="divider"></div><div class="label">AGENT MODE</div><label style="display:flex;gap:9px;align-items:center;margin:8px 0 10px"><input type="checkbox" id="agentMode"> Let the model use safe local tools</label><div class="small">Tools can inspect basic system info, list/read files in your home folder, and run a short allowlist of harmless commands.</div><button class="btn" id="toolsBtn" style="width:100%;margin-top:8px">View available tools</button><div id="toolsList" class="small" style="margin-top:7px"></div><div class="divider"></div><div class="label">COMMANDS</div>
-<button class="btn sample" data-prompt="What can you do? Give me a short list of commands you can handle.">› Show capabilities</button>
-<button class="btn sample" data-prompt="Summarize the conversation so far in a few bullets.">› Summarize chat</button>
-<button class="btn sample" data-prompt="Look at the attached image and describe its contents." >› Analyze attached image</button>
-<div class="divider"></div><div class="label">VISION INPUT</div><input type="file" id="imageFile" class="field" accept="image/*" aria-label="Choose image"><button class="btn" id="cameraBtn">Open webcam</button><video id="camera" class="hidden" autoplay playsinline></video><div class="btnrow" style="margin-top:8px"><button class="btn hidden" id="captureBtn">Capture frame</button><button class="btn hidden" id="stopCameraBtn">Stop camera</button></div><div id="imagePreview"></div>
-<div class="small" style="margin-top:12px">Vision requires a vision-capable Ollama model. Webcam access is only started when you press the button.</div>
+<header><div class="brand"><div class="mark">›</div> COMMAND AI</div><div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Browser AI not loaded</span></div></header>
+<main>
+<section class="intro"><h1>Your browser.<br><span>Your AI.</span></h1><p>A public, browser-based AI assistant. No Ollama, Python, account, or API key required.</p></section>
+<div class="layout">
+<aside class="panel side">
+<div class="label">BROWSER AI ENGINE</div>
+<select id="model" class="field" aria-label="AI model"><option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 2.5 · 0.5B (smaller download)</option><option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen 2.5 · 1.5B (more capable)</option></select>
+<button id="loadModel" class="btn primary full">Load AI model</button>
+<div class="progress"><span id="progressBar"></span></div><div id="progressText" class="small">The first load downloads model files and may take a while. The browser should cache them for later visits.</div>
+<div class="notice small"><b>Runs on your device.</b> Prompts are processed in your browser. Requires a WebGPU-capable browser and enough available memory/storage. Model downloads can be hundreds of MB or more.</div>
+<div class="divider"></div><div class="label">AGENT MODULES</div>
+<label style="display:flex;gap:9px;align-items:center;margin:8px 0 10px"><input type="checkbox" id="agentMode" checked> Enable built-in tools</label>
+<div class="small">The AI can request a calculator, current time, open a website, and inspect text files you explicitly attach. Tool access is restricted to this page.</div>
+<div id="toolsList" class="small" style="margin-top:8px"><span class="tag">Calculator</span><span class="tag">Time & date</span><span class="tag">Open URL</span><span class="tag">Attached text files</span></div>
+<div class="divider"></div><div class="label">ATTACH TEXT FILES</div><input type="file" id="textFiles" class="field" accept=".txt,.md,.csv,.json,.js,.py,.html,.css,.xml,.log,.yaml,.yml" multiple aria-label="Attach text files"><div id="fileList" class="small">Only files you select are available to the assistant. Files are read in this browser.</div>
+<div class="divider"></div><div class="label">QUICK COMMANDS</div>
+<button class="btn full sample" data-prompt="What can you do? Explain your tools and limitations.">› Show capabilities</button>
+<button class="btn full sample" data-prompt="Summarize our conversation so far.">› Summarize chat</button>
+<button class="btn full sample" data-prompt="Give me three useful things you can help me do.">› Suggest tasks</button>
+<div class="divider"></div><div class="small">Public site · Open-source browser inference via WebLLM · No hosted inference API configured.</div>
 </aside>
-<section class="panel chat"><div class="chathead"><strong>COMMAND SESSION</strong><button class="btn" id="clear">Clear chat</button></div><div class="messages" id="messages"><div class="msg system">Ready. Connect to Ollama, choose a model, and give it a command.</div></div><div class="composer"><textarea id="prompt" placeholder="Type a command… (Enter to send, Shift+Enter for a new line)" aria-label="Command"></textarea><div class="composebottom"><div class="small" id="hint">Local model · Agent mode uses a limited, safe tool allowlist</div><button class="btn primary" id="send">Run command ↗</button></div></div></section></div>
+<section class="panel chat"><div class="chathead"><strong>COMMAND SESSION</strong><button class="btn" id="clear">Clear chat</button></div><div class="messages" id="messages"><div class="msg system">Load a model to begin. After the first download, it may be cached by your browser.</div></div><div class="composer"><textarea id="prompt" placeholder="Ask a question or give a command… (Enter to send)" aria-label="Message"></textarea><div class="composebottom"><div class="small" id="hint">No model loaded</div><button class="btn primary" id="send" disabled>Send ↗</button></div></div></section>
+</div>
 </main>
-<script>
-(()=>{
-const $=id=>document.getElementById(id);let history=[],imageData=null,stream=null;
-const saved=localStorage.getItem('command-ai-endpoint');if(saved)$('endpoint').value=saved;
-function say(text,kind='assistant',imageUrl=null){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;if(imageUrl){const img=document.createElement('img');img.src=imageUrl;img.className='preview';el.appendChild(img)}$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight;return el}
-function endpoint(){return $('endpoint').value.trim().replace(/\/+$/,'')}
-function setStatus(ok,text){$('statusDot').classList.toggle('ok',ok);$('statusText').textContent=text}
-async function connect(){const base=endpoint();localStorage.setItem('command-ai-endpoint',base);$('connect').disabled=true;$('connect').textContent='Connecting…';try{const r=await fetch(base+'/api/tags');if(!r.ok)throw Error('HTTP '+r.status);const d=await r.json();const models=d.models||[];$('model').replaceChildren();for(const m of models){const o=document.createElement('option');o.value=m.name;o.textContent=m.name;$('model').appendChild(o)}if(!models.length){const o=document.createElement('option');o.textContent='No models installed';o.value='';$('model').appendChild(o)}setStatus(true,'Ollama connected');$('connectionNote').textContent=models.length+' model(s) found on your computer.';say('Connected to Ollama. '+models.length+' model(s) available.','system')}catch(e){setStatus(false,'Ollama offline');$('connectionNote').textContent='Could not connect: '+e.message+'. Start Ollama and allow this website in OLLAMA_ORIGINS.';say('Connection failed: '+e.message+'. Check that Ollama is running and cross-origin access is configured.','system')}finally{$('connect').disabled=false;$('connect').textContent='Connect to Ollama'}}
-function fileToData(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file)})}
-async function setImage(file){if(!file)return;if(!file.type.startsWith('image/')){say('Please choose an image file.','system');return}imageData=await fileToData(file);const url=URL.createObjectURL(file);$('imagePreview').replaceChildren();const img=document.createElement('img');img.src=url;img.className='preview';$('imagePreview').appendChild(img);say('Image attached: '+file.name,'system')}
-async function runCommand(){const text=$('prompt').value.trim();if(!text&&!imageData)return;if(!$('model').value){say('Connect to Ollama and select a model first.','system');return}
-if(/^\/clear$/i.test(text)){history=[];$('messages').replaceChildren();$('prompt').value='';return}
-if(/^\/models$/i.test(text)){await connect();$('prompt').value='';return}
-if(/^\/time$/i.test(text)||/^(what time is it|current time)$/i.test(text)){say(text||'/time','user');say('Your browser time is '+new Date().toLocaleString()+'.');$('prompt').value='';return}
-if(/^open\s+https?:\/\//i.test(text)){try{const url=new URL(text.replace(/^open\s+/i,''));say('Opening '+url.href,'user');window.open(url.href,'_blank','noopener,noreferrer');say('Opened the requested website in a new tab.','assistant')}catch(e){say('That URL is not valid.','assistant')}$('prompt').value='';return}
-const userContent=[];if(text)userContent.push({type:'text',text});if(imageData)userContent.push({type:'image',image:imageData});say(text||'Please analyze this image.','user',imageData?$('imagePreview').querySelector('img')?.src:null);$('prompt').value='';const pending=say('Working…','assistant');$('send').disabled=true;
-const msg={role:'user',content:text||'Please analyze this image.'};if(imageData)msg.images=[imageData];const payloadHistory=history.concat([msg]);imageData=null;$('imageFile').value='';$('imagePreview').replaceChildren();
-try{const agent=$('agentMode').checked;const r=await fetch(endpoint()+(agent?'/api/agent':'/api/chat'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:$('model').value,messages:payloadHistory,stream:false,options:{num_ctx:2048}})});if(!r.ok)throw Error('HTTP '+r.status);const data=await r.json();const answer=data.message?.content||'(The model returned no text.)';pending.textContent=answer;if(data.tools_used?.length){const summary=data.tools_used.map(t=>t.tool+(t.ok?' ✓':' — '+(t.result?.error||'failed'))).join(', ');say('Tools used: '+summary,'system')}history=payloadHistory.concat([{role:'assistant',content:answer}]);}catch(e){pending.textContent='Command failed: '+e.message+'. Check the Ollama connection, CORS settings, and selected model.'}finally{$('send').disabled=false;$('prompt').focus()}}
-$('connect').addEventListener('click',connect);$('toolsBtn').addEventListener('click',async()=>{try{const r=await fetch(endpoint()+'/api/tools');const d=await r.json();$('toolsList').textContent=(d.tools||[]).map(t=>t.name+' — '+t.description).join('\\n')||d.error||'No tools returned';}catch(e){$('toolsList').textContent='Start the local companion first: ./start.sh'}});$('send').addEventListener('click',runCommand);$('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();runCommand()}});$('clear').addEventListener('click',()=>{history=[];$('messages').replaceChildren();say('Session cleared.','system')});document.querySelectorAll('.sample').forEach(b=>b.addEventListener('click',()=>{$('prompt').value=b.dataset.prompt;$('prompt').focus()}));$('imageFile').addEventListener('change',e=>setImage(e.target.files[0]));
-$('cameraBtn').addEventListener('click',async()=>{try{stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});$('camera').srcObject=stream;$('camera').classList.remove('hidden');$('captureBtn').classList.remove('hidden');$('stopCameraBtn').classList.remove('hidden');$('cameraBtn').classList.add('hidden')}catch(e){say('Webcam could not start: '+e.message,'system')}});
-$('captureBtn').addEventListener('click',()=>{const v=$('camera'),c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);c.toBlob(async blob=>{if(blob)await setImage(new File([blob],'webcam-frame.jpg',{type:'image/jpeg'}))},'image/jpeg',.85)});
-function stopCamera(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;$('camera').srcObject=null;$('camera').classList.add('hidden');$('captureBtn').classList.add('hidden');$('stopCameraBtn').classList.add('hidden');$('cameraBtn').classList.remove('hidden')}
-$('stopCameraBtn').addEventListener('click',stopCamera);window.addEventListener('beforeunload',stopCamera);
-connect();
-})();
+<script type="module">
+const $=id=>document.getElementById(id);
+let engine=null,loading=false,history=[],attachedFiles=[],busy=false;
+const SYSTEM="You are COMMAND AI, a helpful and honest browser-based assistant. You may call a tool by responding with ONLY one JSON object like {\\"tool\\":\\"calculator\\",\\"arguments\\":{\\"expression\\":\\"2+2\\"}}. Available tools: calculator with expression; current_time with no arguments; open_website with url; list_attached_files with no arguments; read_attached_file with filename. Only use tools when needed. Never claim an action succeeded unless the tool result confirms it. Tool access is limited to this page and files explicitly selected by the user. Do not claim to have internet search, arbitrary computer access, or image vision. If a tool result arrives, answer the original user using that result.";
+function say(text,kind='assistant'){const el=document.createElement('div');el.className='msg '+kind;el.textContent=text;$('messages').appendChild(el);$('messages').scrollTop=$('messages').scrollHeight;return el}
+function status(ok,text){$('statusDot').classList.toggle('ok',ok);$('statusText').textContent=text}
+function safeCalc(expression){
+ const s=String(expression).replace(/\s+/g,''); if(!s||s.length>100||!/^[0-9.+*/()%\-]+$/.test(s))throw Error('Only arithmetic expressions are allowed.');
+ let i=0;
+ function expr(){let v=term();while(s[i]==='+'||s[i]==='-'){const op=s[i++],r=term();v=op==='+'?v+r:v-r}return v}
+ function term(){let v=factor();while(s[i]==='*'||s[i]==='/'){const op=s[i++],r=factor();if(op==='/'&&r===0)throw Error('Division by zero.');v=op==='*'?v*r:v/r}return v}
+ function factor(){if(s[i]==='+'){i++;return factor()}if(s[i]==='-'){i++;return -factor()}if(s[i]==='('){i++;const v=expr();if(s[i++]!==')')throw Error('Missing closing parenthesis.');return v}const start=i;while(/[0-9.]/.test(s[i]||''))i++;if(start===i)throw Error('Expected a number.');const v=Number(s.slice(start,i));if(!Number.isFinite(v))throw Error('Invalid number.');return v}
+ const result=expr();if(i!==s.length||!Number.isFinite(result))throw Error('Invalid arithmetic expression.');return result;
+}
+async function runTool(name,args={}){
+ if(name==='calculator')return {expression:args.expression,result:safeCalc(args.expression)};
+ if(name==='current_time')return {time:new Date().toLocaleString(),timezone:Intl.DateTimeFormat().resolvedOptions().timeZone};
+ if(name==='open_website'){const u=new URL(String(args.url||''));if(!['http:','https:'].includes(u.protocol))throw Error('Only HTTP and HTTPS URLs are allowed.');const w=window.open(u.href,'_blank','noopener,noreferrer');return {url:u.href,opened:!!w,note:w?'Opened in a new tab.':'The browser blocked the popup; allow popups for this site.'}}
+ if(name==='list_attached_files')return {files:attachedFiles.map(f=>({name:f.name,characters:f.content.length}))};
+ if(name==='read_attached_file'){const f=attachedFiles.find(x=>x.name===String(args.filename||''));if(!f)throw Error('That file was not selected or its name does not match.');return {name:f.name,content:f.content.slice(0,20000),truncated:f.content.length>20000};}
+ throw Error('Unknown tool.');
+}
+async function agentReply(userText){
+ const messages=[{role:'system',content:SYSTEM},...history,{role:'user',content:userText}];
+ for(let n=0;n<4;n++){
+  const response=await engine.chat.completions.create({messages,temperature:0.3,max_tokens:700});
+  const answer=String(response.choices?.[0]?.message?.content||'').trim();
+  let call=null;
+  try{const cleaned=answer.replace(/^\`\`\`(?:json)?\s*/i,'').replace(/\s*\`\`\`$/,'');const obj=JSON.parse(cleaned);if(obj&&typeof obj.tool==='string')call=obj}catch{}
+  if(!call||!$('agentMode').checked)return answer||'(No response returned.)';
+  let result;
+  try{result=await runTool(call.tool,call.arguments||{})}catch(e){result={error:e.message}}
+  messages.push({role:'assistant',content:answer});
+  messages.push({role:'user',content:'TOOL RESULT for '+call.tool+': '+JSON.stringify(result)+'\nUse this result to answer the original request. If it failed, explain that honestly.'});
+  say('Tool used: '+call.tool,'system');
+ }
+ return 'I reached the tool-call limit. Try splitting the request into smaller steps.';
+}
+async function loadModel(){
+ if(loading||engine)return;loading=true;$('loadModel').disabled=true;$('model').disabled=true;status(false,'Loading browser AI…');$('progressBar').style.width='0%';
+ try{
+  const webllm=await import('https://esm.run/@mlc-ai/web-llm');
+  const model=$('model').value;
+  engine=await webllm.CreateMLCEngine(model,{initProgressCallback:(p)=>{const pct=Math.max(0,Math.min(100,Math.round((p.progress||0)*100)));$('progressBar').style.width=pct+'%';$('progressText').textContent=p.text||('Loading model '+pct+'%');}});
+  status(true,'Browser AI ready');$('progressText').textContent='Model ready. Inference runs on this device.';$('hint').textContent='Ready · On-device inference';$('send').disabled=false;$('loadModel').textContent='Model loaded';say('Model loaded. COMMAND AI is ready.','system');
+ }catch(e){engine=null;status(false,'Could not load model');$('progressText').textContent='Could not load the model: '+e.message+'. Try a WebGPU-enabled browser, free up memory, or choose the smaller model.';say('Model loading failed: '+e.message,'system');}
+ finally{loading=false;$('loadModel').disabled=!!engine;$('model').disabled=!!engine;if(engine)$('loadModel').textContent='Model loaded';}
+}
+async function send(){
+ const text=$('prompt').value.trim();if(!text||busy)return;if(!engine){say('Load an AI model first.','system');return}
+ busy=true;$('send').disabled=true;say(text,'user');$('prompt').value='';const pending=say('Thinking…','assistant');
+ try{const answer=await agentReply(text);pending.textContent=answer;history.push({role:'user',content:text},{role:'assistant',content:answer});if(history.length>24)history=history.slice(-24)}catch(e){pending.textContent='The model hit an error: '+e.message}
+ finally{busy=false;$('send').disabled=!engine;$('prompt').focus()}
+}
+$('loadModel').addEventListener('click',loadModel);
+$('model').addEventListener('change',()=>{if(engine){say('To switch models, refresh the page and load the other model.','system')}});
+$('send').addEventListener('click',send);
+$('prompt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+$('clear').addEventListener('click',()=>{history=[];$('messages').replaceChildren();say('Conversation cleared.','system')});
+document.querySelectorAll('.sample').forEach(b=>b.addEventListener('click',()=>{$('prompt').value=b.dataset.prompt;$('prompt').focus()}));
+$('textFiles').addEventListener('change',async e=>{attachedFiles=[];for(const f of Array.from(e.target.files||[])){if(f.size>200000){say(f.name+' skipped: maximum file size is 200 KB.','system');continue}attachedFiles.push({name:f.name,content:await f.text()})}$('fileList').textContent=attachedFiles.length?attachedFiles.map(f=>f.name+' ('+f.content.length+' characters)').join('\n'):'No text files attached.';say(attachedFiles.length+' text file(s) made available to the agent.','system')});
+status(false,'Browser AI not loaded');
 </script>
-</body></html>
+</body>
+</html>
