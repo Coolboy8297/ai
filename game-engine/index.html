@@ -75,7 +75,7 @@ function setup(){
  const fill=new THREE.DirectionalLight(0x689dff,.85);fill.position.set(-7,4,-6);scene.add(fill);
  const grid=new THREE.GridHelper(100,100,0x426078,0x273747);grid.position.y=.003;scene.add(grid);
  const axes=new THREE.AxesHelper(1.5);axes.position.y=.02;scene.add(axes);
- gizmo=new TransformControls(camera,renderer.domElement);scene.add(gizmo);gizmo.addEventListener('dragging-changed',e=>orbit.enabled=!e.value&&!playing);gizmo.addEventListener('objectChange',()=>{if(selected)renderInspector()});gizmo.addEventListener('mouseUp',recordHistory);
+ gizmo=new TransformControls(camera,renderer.domElement);const gizmoRoot=typeof gizmo.getHelper==='function'?gizmo.getHelper():gizmo;scene.add(gizmoRoot);gizmo.addEventListener('dragging-changed',e=>orbit.enabled=!e.value&&!playing);gizmo.addEventListener('objectChange',()=>{if(selected)renderInspector()});gizmo.addEventListener('mouseUp',recordHistory);
  renderer.domElement.addEventListener('pointerdown',pickObject);
  window.addEventListener('resize',resize);new ResizeObserver(resize).observe(viewport);
 }
