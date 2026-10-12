@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080c12">
+<title>BuildNow GG — AI / FORGE</title>
+<style>
+:root{color-scheme:dark;--bg:#080c12;--panel:#101722;--line:#263448;--text:#e8eef8;--muted:#91a0b5;--gold:#ffc66d}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{display:flex;flex-direction:column}
+header{height:54px;flex:0 0 54px;display:flex;align-items:center;gap:14px;padding:0 16px;border-bottom:1px solid var(--line);background:#0b111a}
+a{color:var(--gold);text-decoration:none;font-weight:700}
+a:hover{text-decoration:underline}
+.brand{font-weight:850;letter-spacing:.1em;margin-right:auto}
+.brand span{color:var(--gold)}
+.note{color:var(--muted);font-size:12px}
+main{position:relative;flex:1;min-height:0;background:#080c12}
+iframe{display:block;width:100%;height:100%;border:0;background:#080c12}
+#fallback{display:none;position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;padding:24px;background:radial-gradient(ellipse at 50% 20%,#29364a,transparent 60%),#080c12}
+#fallback.show{display:flex}
+.panel{max-width:520px}
+h1{font-size:clamp(30px,6vw,54px);margin:0 0 12px;letter-spacing:-.04em}
+p{color:var(--muted);line-height:1.65}
+.button{display:inline-block;background:var(--gold);color:#201709;padding:12px 18px;border-radius:10px;margin-top:12px}
+@media(max-width:650px){.note{display:none}header{height:48px;flex-basis:48px}}
+</style>
+</head>
+<body>
+<header>
+<a href="../" aria-label="Back to launcher">← Launcher</a>
+<div class="brand">BUILDNOW <span>GG</span></div>
+<div class="note">Embedded game view</div>
+<a href="https://buildnow.gg/" target="_blank" rel="noopener noreferrer">Open site ↗</a>
+</header>
+<main>
+<iframe id="game" src="https://buildnow.gg/" title="BuildNow GG game" allow="fullscreen; autoplay; gamepad; clipboard-read; clipboard-write" allowfullscreen></iframe>
+<div id="fallback">
+<div class="panel">
+<h1>BuildNow GG</h1>
+<p>The game site may block being embedded inside another website. If the game doesn't appear below, that restriction is controlled by BuildNow GG, not this launcher.</p>
+<a class="button" href="https://buildnow.gg/" target="_blank" rel="noopener noreferrer">Try opening BuildNow GG ↗</a>
+<p><a href="../">← Back to AI / FORGE launcher</a></p>
+</div>
+</div>
+</main>
+<script>
+const frame=document.getElementById('game');
+let loaded=false;
+frame.addEventListener('load',()=>{loaded=true;});
+// Browsers don't expose cross-origin frame errors. Keep the embedded attempt visible;
+// show a manual fallback only if the frame fails to load at all.
+setTimeout(()=>{if(!loaded)document.getElementById('fallback').classList.add('show');},12000);
+</script>
+</body>
+</html>
