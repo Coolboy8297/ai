@@ -100,7 +100,8 @@ function addObject(type,opts={}){
  scene.add(obj);objects.push(obj);if(obj.isMesh||obj.isLight||obj.isCamera)pickables.push(obj);updateHelperVisibility();renderTree();select(obj);recordHistory();return obj;
 }
 function isHelper(o){return !!o.userData.helper||o.isCameraHelper||o.isLightHelper;}
-function updateHelperVisibility(){scene.traverse(o=>{if(isHelper(o))o.visible=!!selected&&(o===selected||o.parent===selected||o.userData.ownerId===selected?.userData.id);});}\nfunction updateSelectionOutline(){if(!selectionOutline)return;if(!selected){selectionOutline.visible=false;return;}selectionOutline.box.setFromObject(selected);selectionOutline.visible=!selectionOutline.box.isEmpty();}
+function updateHelperVisibility(){scene.traverse(o=>{if(isHelper(o))o.visible=!!selected&&(o===selected||o.parent===selected||o.userData.ownerId===selected?.userData.id);});}
+function updateSelectionOutline(){if(!selectionOutline)return;if(!selected){selectionOutline.visible=false;return;}selectionOutline.box.setFromObject(selected);selectionOutline.visible=!selectionOutline.box.isEmpty();}
 function select(obj){selected=obj;if(selectionOutline){selectionOutline.visible=!!obj;if(obj)updateSelectionOutline();}renderTree();renderInspector();if(obj&&!obj.userData.locked){gizmo.attach(obj);gizmo.setMode($('#modeMove').classList.contains('active')?'translate':$('#modeRotate').classList.contains('active')?'rotate':'scale');gizmo.setSpace(transformSpace);}else gizmo.detach();updateHelperVisibility();if(scriptOpen)loadScriptEditor();}
 function iconFor(o){return o.userData.type==='Point Light'?'☼':o.userData.type==='Camera'?'◉':o.userData.type==='Sphere'?'●':o.userData.type==='Plane'?'▱':o.userData.type==='Torus'?'◎':o.userData.type==='Cone'?'△':o.userData.type==='Imported Model'?'▧':'▣';}
 function renderTree(){
