@@ -1,4 +1,4 @@
-name: Deploy Command AI to GitHub Pages
+name: Deploy Command Vision to GitHub Pages
 
 on:
   push:
@@ -28,12 +28,12 @@ jobs:
           python3 - <<'PY'
           import re
           source = open("index.html", encoding="utf-8").read()
-          match = re.search(r'<script type="module">(.*?)</script>', source, re.S)
-          if not match:
-              raise SystemExit("Browser JavaScript module not found")
-          open("/tmp/command-ai-check.mjs", "w", encoding="utf-8").write(match.group(1))
+          scripts = re.findall(r'<script(?:\\s[^>]*)?>(.*?)</script>', source, re.S | re.I)
+          if not scripts:
+              raise SystemExit("No inline browser JavaScript found in index.html")
+          open("/tmp/command-vision-check.js", "w", encoding="utf-8").write(scripts[-1])
           PY
-          node --check /tmp/command-ai-check.mjs
+          node --check /tmp/command-vision-check.js
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
