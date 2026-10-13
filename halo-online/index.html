@@ -33,10 +33,11 @@ footer{margin-top:24px;color:#718198;font-size:12px;display:flex;justify-content
 <h2>Halo: Combat Evolved — browser runtime</h2>
 <p class="muted small">The game runs through the independently hosted Halo CE Web client below. When it loads, use its <b>Choose XISO</b> button and select your own <code>.xiso.iso</code> file. The file picker must be used inside the game client because browsers do not let this GitHub page pass a local file directly into another website.</p>
 <div class="notice">Your ISO is selected by the external game client, not uploaded to this GitHub repository. If the embedded game stays blank or refuses to load, use “Open game in its own tab” below.</div>
-<div class="row"><a class="button" href="https://mitchellhynes.com/halo/halo.html" target="_blank" rel="noopener noreferrer">Open game in its own tab ↗</a></div>
-<div style="margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#05070a">
-<iframe title="Halo Combat Evolved browser game" src="https://mitchellhynes.com/halo/halo.html" style="display:block;width:100%;height:min(78vh,820px);min-height:520px;border:0;background:#05070a" allow="fullscreen; gamepad; pointer-lock; autoplay" allowfullscreen loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+<div class="row"><a class="button" href="https://mitchellhynes.com/halo/halo.html" target="_blank" rel="noopener noreferrer">Open game in its own tab ↗</a><button id="fullscreenButton" type="button" aria-label="Enter fullscreen">⛶ Fullscreen</button></div>
+<div id="gameFrameWrap" style="margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#05070a">
+<iframe id="haloFrame" title="Halo Combat Evolved browser game" src="https://mitchellhynes.com/halo/halo.html" style="display:block;width:100%;height:min(78vh,820px);min-height:520px;border:0;background:#05070a" allow="fullscreen; gamepad; pointer-lock; autoplay" allowfullscreen loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
 </div>
+<p class="muted small">Press <kbd>Esc</kbd> to leave fullscreen normally.</p>
 </section>
 <section class="panel">
 <div class="status">02 / ONLINE PLAY</div>
@@ -65,5 +66,26 @@ footer{margin-top:24px;color:#718198;font-size:12px;display:flex;justify-content
 <footer><span>AI / FORGE · HALO ONLINE LAB</span><span>Prototype interface · not yet playable multiplayer</span></footer>
 </main>
 
+<script>
+const fullscreenButton = document.getElementById('fullscreenButton');
+const gameFrameWrap = document.getElementById('gameFrameWrap');
+function updateFullscreenButton() {
+  const active = document.fullscreenElement === gameFrameWrap;
+  fullscreenButton.textContent = active ? '⛶ Exit fullscreen' : '⛶ Fullscreen';
+  fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
+}
+fullscreenButton.addEventListener('click', async () => {
+  try {
+    if (document.fullscreenElement === gameFrameWrap) {
+      await document.exitFullscreen();
+    } else if (gameFrameWrap.requestFullscreen) {
+      await gameFrameWrap.requestFullscreen();
+    }
+  } catch (error) {
+    fullscreenButton.textContent = 'Fullscreen unavailable';
+  }
+});
+document.addEventListener('fullscreenchange', updateFullscreenButton);
+</script>
 </body>
 </html>
