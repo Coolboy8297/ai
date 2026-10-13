@@ -31,11 +31,12 @@ footer{margin-top:24px;color:#718198;font-size:12px;display:flex;justify-content
 <section class="panel">
 <div class="status">01 / LOCAL GAME IMAGE</div>
 <h2>Select your XISO image</h2>
-<p class="muted small">Choose your own <code>.xiso.iso</code> file to check its filename and size locally. This page does not upload or store the image.</p>
+<p class="muted small">First, select your own <code>.xiso.iso</code> file here. The page keeps it local in your browser and requires you to select it again when you return.</p>
 <label for="gameImage" class="small">Xbox disc image</label>
 <input id="gameImage" type="file" accept=".iso,.xiso">
-<div id="fileStatus" class="muted small" role="status">No image selected yet.</div>
-<div class="notice">This is only a local file-selection check. The browser launcher does not yet parse or run the ISO; we must confirm the browser client’s exact format requirements first.</div>
+<div id="fileStatus" class="muted small" role="status">Required: select your ISO before continuing.</div>
+<div id="isoGate" class="notice">ISO not loaded. Choose the file above to unlock the next setup step.</div>
+<div class="notice">Important: this selects the ISO locally; it does not upload it to GitHub. The page still needs a compatible game runtime before it can launch the actual game.</div>
 </section>
 <section class="panel">
 <div class="status">02 / ONLINE SERVICE</div>
@@ -47,7 +48,7 @@ footer{margin-top:24px;color:#718198;font-size:12px;display:flex;justify-content
 <li>Set up a reachable multiplayer server or supported relay.</li>
 <li>Test joining a private match before adding a public server browser.</li>
 </ul>
-<span class="pill">SERVER NOT CONFIGURED</span>
+<span class="pill" id="projectStatus">ISO REQUIRED · GAME RUNTIME NOT CONFIGURED</span>
 </section>
 <section class="panel">
 <div class="status">03 / TEST CLIENT</div>
@@ -72,11 +73,17 @@ footer{margin-top:24px;color:#718198;font-size:12px;display:flex;justify-content
 <script>
 const picker=document.getElementById('gameImage');
 const status=document.getElementById('fileStatus');
+const gate=document.getElementById('isoGate');
+const projectStatus=document.getElementById('projectStatus');
+picker.required=true;
 picker.addEventListener('change',()=>{
  const f=picker.files&&picker.files[0];
- if(!f){status.textContent='No image selected yet.';return;}
+ if(!f){status.textContent='Required: select your ISO before continuing.';gate.textContent='ISO not loaded. Choose the file above to unlock the next setup step.';projectStatus.textContent='ISO REQUIRED · GAME RUNTIME NOT CONFIGURED';return;}
  const size=(f.size/1024/1024).toFixed(1);
- status.textContent='Selected locally: '+f.name+' · '+size+' MiB. No upload performed. Compatibility has not been verified.';
+ const looksLikeIso=/\.(xiso\.iso|xiso|iso)$/i.test(f.name);
+ status.textContent='Selected locally: '+f.name+' · '+size+' MiB.';
+ gate.textContent=looksLikeIso?'ISO selected. File type looks right, but the game data has not been parsed or verified yet.':'File selected, but its extension does not look like an ISO image.';
+ projectStatus.textContent=looksLikeIso?'ISO SELECTED · GAME RUNTIME NOT CONFIGURED':'CHECK FILE TYPE · GAME RUNTIME NOT CONFIGURED';
 });
 </script>
 </body>
