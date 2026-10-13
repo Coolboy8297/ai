@@ -24,67 +24,46 @@ footer{margin-top:24px;color:#718198;font-size:12px;display:flex;justify-content
 <body>
 <header><div class="brand">AI <span>/</span> FORGE</div><a href="../">← Back to launcher</a></header>
 <main>
-<div class="eyebrow">MULTIPLAYER PROJECT · EARLY SETUP</div>
+<div class="eyebrow">HALO CE · BROWSER GAME</div>
 <h1>HALO <span>ONLINE LAB</span></h1>
-<p class="lead">A home for our Halo: Combat Evolved online project. We’ll use your own Xbox game image to test compatibility, then connect a compatible client to a separately hosted multiplayer service.</p>
+<p class="lead">Launch the browser version of Halo: Combat Evolved here, then load your own Xbox disc image in its game window.</p>
 <div class="grid">
-<section class="panel">
-<div class="status">01 / LOCAL GAME IMAGE</div>
-<h2>Select your XISO image</h2>
-<p class="muted small">First, select your own <code>.xiso.iso</code> file here. The page keeps it local in your browser and requires you to select it again when you return.</p>
-<label for="gameImage" class="small">Xbox disc image</label>
-<input id="gameImage" type="file" accept=".iso,.xiso">
-<div id="fileStatus" class="muted small" role="status">Required: select your ISO before continuing.</div>
-<div id="isoGate" class="notice">ISO not loaded. Choose the file above to unlock the next setup step.</div>
-<div class="notice">Important: this selects the ISO locally; it does not upload it to GitHub. The page still needs a compatible game runtime before it can launch the actual game.</div>
+<section class="panel" style="grid-column:1/-1">
+<div class="status">01 / PLAY HALO</div>
+<h2>Halo: Combat Evolved — browser runtime</h2>
+<p class="muted small">The game runs through the independently hosted Halo CE Web client below. When it loads, use its <b>Choose XISO</b> button and select your own <code>.xiso.iso</code> file. The file picker must be used inside the game client because browsers do not let this GitHub page pass a local file directly into another website.</p>
+<div class="notice">Your ISO is selected by the external game client, not uploaded to this GitHub repository. If the embedded game stays blank or refuses to load, use “Open game in its own tab” below.</div>
+<div class="row"><a class="button" href="https://mitchellhynes.com/halo/halo.html" target="_blank" rel="noopener noreferrer">Open game in its own tab ↗</a></div>
+<div style="margin-top:16px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#05070a">
+<iframe title="Halo Combat Evolved browser game" src="https://mitchellhynes.com/halo/halo.html" style="display:block;width:100%;height:min(78vh,820px);min-height:520px;border:0;background:#05070a" allow="fullscreen; gamepad; pointer-lock; autoplay" allowfullscreen loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</div>
 </section>
 <section class="panel">
-<div class="status">02 / ONLINE SERVICE</div>
-<h2>Multiplayer connection</h2>
-<p class="muted">The online service is not configured yet. GitHub Pages can host this interface, but it cannot run the actual game server.</p>
+<div class="status">02 / ONLINE PLAY</div>
+<h2>Play with friends</h2>
+<p class="muted">The embedded client has its own online multiplayer interface. GitHub Pages hosts this launcher only; the game runtime and multiplayer services are hosted separately.</p>
 <ul class="list">
-<li>Choose a compatible Halo CE browser/client runtime.</li>
-<li>Confirm Xbox XISO game-data compatibility.</li>
-<li>Set up a reachable multiplayer server or supported relay.</li>
-<li>Test joining a private match before adding a public server browser.</li>
+<li>Load your ISO using the embedded client’s “Choose XISO” button.</li>
+<li>Wait for the game to finish loading.</li>
+<li>Use the client’s online multiplayer menu to create or join an invite room.</li>
 </ul>
-<span class="pill" id="projectStatus">ISO REQUIRED · GAME RUNTIME NOT CONFIGURED</span>
+<span class="pill">BROWSER CLIENT EMBEDDED</span>
 </section>
+
 <section class="panel">
-<div class="status">03 / TEST CLIENT</div>
-<h2>Existing browser demo</h2>
-<p class="muted small">Use the existing Halo page as a separate compatibility reference. It is not connected to our new multiplayer backend, and opening it does not mean online play is configured.</p>
-<div class="row"><a class="button" href="https://mitchellhynes.com/halo/halo.html" target="_blank" rel="noopener noreferrer">Open browser demo ↗</a></div>
-</section>
-<section class="panel">
-<div class="status">04 / PROJECT CHECKLIST</div>
-<h2>What remains</h2>
+<div class="status">03 / IMPORTANT</div>
+<h2>Game files stay yours</h2>
 <ul class="list">
-<li>Verify image format and supported game revision.</li>
-<li>Integrate a legally distributable client/runtime (game data stays yours).</li>
-<li>Implement real connection and room discovery.</li>
-<li>Test two clients in the same match.</li>
+<li>Choose an ISO from your own device in the game client.</li>
+<li>This GitHub page does not upload or store the ISO.</li>
+<li>The game client is an independent external project embedded here.</li>
+<li>If embedding is blocked by the hosting site, open the game in its own tab.</li>
 </ul>
-<p class="muted small">No game files are bundled in this repository. Do not commit your ISO to GitHub Pages.</p>
+<p class="muted small">The GitHub repository contains the launcher interface, not the game itself.</p>
 </section>
 </div>
 <footer><span>AI / FORGE · HALO ONLINE LAB</span><span>Prototype interface · not yet playable multiplayer</span></footer>
 </main>
-<script>
-const picker=document.getElementById('gameImage');
-const status=document.getElementById('fileStatus');
-const gate=document.getElementById('isoGate');
-const projectStatus=document.getElementById('projectStatus');
-picker.required=true;
-picker.addEventListener('change',()=>{
- const f=picker.files&&picker.files[0];
- if(!f){status.textContent='Required: select your ISO before continuing.';gate.textContent='ISO not loaded. Choose the file above to unlock the next setup step.';projectStatus.textContent='ISO REQUIRED · GAME RUNTIME NOT CONFIGURED';return;}
- const size=(f.size/1024/1024).toFixed(1);
- const looksLikeIso=/\.(xiso\.iso|xiso|iso)$/i.test(f.name);
- status.textContent='Selected locally: '+f.name+' · '+size+' MiB.';
- gate.textContent=looksLikeIso?'ISO selected. File type looks right, but the game data has not been parsed or verified yet.':'File selected, but its extension does not look like an ISO image.';
- projectStatus.textContent=looksLikeIso?'ISO SELECTED · GAME RUNTIME NOT CONFIGURED':'CHECK FILE TYPE · GAME RUNTIME NOT CONFIGURED';
-});
-</script>
+
 </body>
 </html>
