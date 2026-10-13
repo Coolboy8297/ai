@@ -69,8 +69,32 @@ footer{margin-top:24px;color:#718198;font-size:12px;display:flex;justify-content
 <script>
 const fullscreenButton = document.getElementById('fullscreenButton');
 const gameFrameWrap = document.getElementById('gameFrameWrap');
+const haloFrame = document.getElementById('haloFrame');
+const fullscreenStyle = document.createElement('style');
+fullscreenStyle.textContent = `
+#gameFrameWrap:fullscreen, #gameFrameWrap.fullscreen-mode {
+  width: 100vw !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  background: #05070a !important;
+}
+#gameFrameWrap:fullscreen iframe, #gameFrameWrap.fullscreen-mode iframe {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  border: 0 !important;
+}
+`;
+document.head.appendChild(fullscreenStyle);
 function updateFullscreenButton() {
   const active = document.fullscreenElement === gameFrameWrap;
+  gameFrameWrap.classList.toggle('fullscreen-mode', active);
   fullscreenButton.textContent = active ? '⛶ Exit fullscreen' : '⛶ Fullscreen';
   fullscreenButton.setAttribute('aria-label', active ? 'Exit fullscreen' : 'Enter fullscreen');
 }
