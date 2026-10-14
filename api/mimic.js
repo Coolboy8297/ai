@@ -1,10 +1,12 @@
+const recentRequests = globalThis.__mimicRecentRequests || (globalThis.__mimicRecentRequests = new Map());
+
 export default async function handler(req, res) {
   const allowedOrigin = "https://coolboy8297.github.io";
   const origin = req.headers.origin;
-  if (origin && origin !== allowedOrigin && !origin.endsWith(".vercel.app")) {
+  if (origin && origin !== allowedOrigin) {
     return res.status(403).json({ error: "Origin not allowed." });
   }
-  res.setHeader("Access-Control-Allow-Origin", origin || allowedOrigin);
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -12,6 +14,18 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Use POST." });
   if (!process.env.OLLAMA_API_KEY) return res.status(503).json({ error: "OLLAMA_API_KEY is not configured on the server." });
+
+  // Best-effort per-instance throttle; configure provider-level protection for stronger limits.
+  const forwarded = req.headers["x-forwarded-for"];
+  const ip = (Array.isArray(forwarded) ? forwarded[0] : String(forwarded || "unknown").split(",")[0]).trim();
+  const now = Date.now();
+  const hits = (recentRequests.get(ip) || []).filter(t => now - t < 60_000);
+  if (hits.length >= 12) return res.status(429).json({ error: "Too many requests. Please wait a minute and try again." });
+  hits.push(now);
+  recentRequests.set(ip, hits);
+  if (recentRequests.size > 500) {
+    for (const [key, times] of recentRequests) if (!times.some(t => now - t < 60_000)) recentRequests.delete(key);
+  }
 
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
