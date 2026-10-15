@@ -11,7 +11,7 @@
 body{margin:0;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.4 "Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column}
 .top{padding:9px 12px 0;background:#202124}
 .tabs{display:flex;gap:5px;align-items:center;min-height:34px}
-.tab{height:32px;max-width:230px;min-width:130px;flex:1;border-radius:9px 9px 0 0;background:#303136;color:var(--muted);display:flex;align-items:center;gap:8px;padding:0 12px;cursor:pointer;border:1px solid transparent}
+.tab{height:32px;max-width:230px;min-width:130px;flex:1;border-radius:9px 9px 0 0;background:#303136;color:var(--muted);display:flex;align-items:center;gap:8px;padding:0 12px;cursor:pointer;border:1px solid transparent;font:inherit;text-align:left}
 .tab.active{background:var(--panel);color:var(--text);border-color:#3c3d41}
 .tab .tab-icon{width:17px;height:17px;flex:0 0 17px;border-radius:4px;display:grid;place-items:center;background:#45474d;color:#dce6f8;font-size:10px;font-weight:800}
 .tab .tab-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left}
@@ -105,13 +105,13 @@ main{position:relative;flex:1;min-height:0;background:#fff}
   function renderTabs(){
     tabsEl.querySelectorAll('.tab').forEach(n=>n.remove());
     tabs.forEach(t=>{
-      const b=document.createElement('button'); b.className='tab'+(t.id===activeTab?' active':''); b.type='button';b.title=t.url||'New tab';
+      const b=document.createElement('div'); b.className='tab'+(t.id===activeTab?' active':''); b.setAttribute('role','tab');b.setAttribute('aria-selected',String(t.id===activeTab));b.tabIndex=0;b.title=t.url||'New tab';
       const icon=document.createElement('span');icon.className='tab-icon';icon.textContent=t.url?new URL(t.url).hostname.replace(/^www\\./,'').slice(0,1).toUpperCase():'＋';b.append(icon);
       const s=document.createElement('span');s.className='tab-title';s.textContent=t.title||'New tab';b.append(s);
       if(t.loading){const spin=document.createElement('span');spin.className='tab-spinner';b.append(spin)}
       const x=document.createElement('button');x.className='tab-close';x.type='button';x.textContent='×';x.title='Close tab';
       x.addEventListener('click',e=>{e.stopPropagation();closeTab(t.id)});b.append(x);
-      b.addEventListener('click',()=>switchTab(t.id));tabsEl.insertBefore(b,$('newtab'));
+      b.addEventListener('click',e=>{if(!e.target.closest('.tab-close'))switchTab(t.id)});b.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();switchTab(t.id)}});tabsEl.insertBefore(b,$('newtab'));
     });
   }
   function active(){return tabs.find(t=>t.id===activeTab)}
