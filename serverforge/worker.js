@@ -59,6 +59,7 @@ export default {
     }
 
     let upstreamPath = null;
+    let forwardedBody = null;
     const path = url.pathname;
 
     if (request.method === "GET" && path === "/api/me") {
@@ -81,7 +82,7 @@ export default {
           return json({ error: { code: "bad_request", message: "signal must be start, stop, restart, or kill." } }, 400, origin);
         }
         upstreamPath = "/servers/" + powerMatch[1] + "/power";
-        request = new Request(request, { body: JSON.stringify({ signal: body.signal }) });
+        forwardedBody = JSON.stringify({ signal: body.signal });
       } else if (request.method === "POST" && commandMatch) {
         let body;
         try { body = await request.json(); } catch { return json({ error: { code: "bad_request", message: "Expected JSON body." } }, 400, origin); }
@@ -89,7 +90,7 @@ export default {
           return json({ error: { code: "bad_request", message: "command must be a single non-empty line of at most 500 characters." } }, 400, origin);
         }
         upstreamPath = "/servers/" + commandMatch[1] + "/commands";
-        request = new Request(request, { body: JSON.stringify({ command: body.command.trim() }) });
+        forwardedBody = JSON.stringify({ command: body.command.trim() });
       }
     }
 
@@ -105,7 +106,7 @@ export default {
     let body;
     if (method === "POST") {
       headers.set("Content-Type", "application/json");
-      body = await request.text();
+      body = forwardedBody ?? await request.text();
     }
 
     try {
