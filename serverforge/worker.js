@@ -1,11 +1,10 @@
 /**
  * SERVERFORGE Cloudflare Worker
  * Deploy this as a Worker, then add these Worker secrets:
- *   FALIX_API_KEY       = your Falix flx_live_... API key
- *   SERVERFORGE_PASSWORD = a new, strong password used only to access this Worker
+ *   FALIX_API_KEY = your Falix API key
  *
- * Only the SERVERFORGE GitHub Pages origin is allowed by CORS.
- * This is a narrow proxy; it is not a general-purpose URL proxy.
+ * Only the SERVERFORGE GitHub Pages origin is accepted for browser API requests.
+ * CORS is not authentication; a public proxy can still be called by scripts.
  */
 const SITE_ORIGIN = "https://coolboy8297.github.io";
 const FALIX_BASE = "https://client.falixnodes.net/api/v2";
@@ -19,7 +18,7 @@ function json(data, status = 200, origin = "") {
   if (origin === SITE_ORIGIN) {
     headers["Access-Control-Allow-Origin"] = SITE_ORIGIN;
     headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
-    headers["Access-Control-Allow-Headers"] = "Content-Type, X-Serverforge-Password";
+    headers["Access-Control-Allow-Headers"] = "Content-Type";
     headers["Access-Control-Max-Age"] = "86400";
   }
   return new Response(JSON.stringify(data), { status, headers });
@@ -38,7 +37,7 @@ export default {
         headers: {
           "Access-Control-Allow-Origin": SITE_ORIGIN,
           "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, X-Serverforge-Password",
+          "Access-Control-Allow-Headers": "Content-Type",
           "Access-Control-Max-Age": "86400",
           "Vary": "Origin",
         },
@@ -50,12 +49,13 @@ export default {
       return json({ ok: true, service: "SERVERFORGE proxy" }, 200, origin);
     }
 
-    if (!env.FALIX_API_KEY || !env.SERVERFORGE_PASSWORD) {
-      return json({ error: { code: "worker_not_configured", message: "Add FALIX_API_KEY and SERVERFORGE_PASSWORD as Worker secrets." } }, 500, origin);
+    // Require the dashboard's browser origin for API calls.
+    // This blocks ordinary cross-origin browser use, but is not authentication.
+    if (origin !== SITE_ORIGIN) {
+      return json({ error: { code: "origin_not_allowed", message: "API requests must come from the SERVERFORGE site." } }, 403, origin);
     }
-    const suppliedPassword = request.headers.get("X-Serverforge-Password") || "";
-    if (suppliedPassword.length < 1 || suppliedPassword !== env.SERVERFORGE_PASSWORD) {
-      return json({ error: { code: "unauthorized", message: "SERVERFORGE access password is incorrect." } }, 401, origin);
+    if (!env.FALIX_API_KEY) {
+      return json({ error: { code: "worker_not_configured", message: "Add FALIX_API_KEY as a Worker secret." } }, 500, origin);
     }
 
     let upstreamPath = null;
