@@ -15,7 +15,7 @@
 <aside class="sidebar">
 <div class="brand"><div class="logo">S</div><div><strong>SERVERFORGE</strong><small>GAME SERVER CONTROL</small></div></div>
 <div><div class="navlabel">WORKSPACE</div><nav class="nav"><button class="active" data-view="overview"><span class="ico">◈</span>Overview</button><button data-view="servers"><span class="ico">▦</span>My servers</button><button data-view="create"><span class="ico">＋</span>Create server</button><button data-view="console"><span class="ico">⌘</span>Console</button><button data-view="settings"><span class="ico">⚙</span>Backend settings</button></nav></div>
-<div class="sidefoot"><div class="eyebrow">HOST CONNECTION</div><div style="margin:9px 0"><span class="dot"></span> <strong style="font-size:12px">Not connected</strong></div><div class="tiny">The dashboard connects through your Cloudflare Worker once the connection password is configured.</div></div>
+<div class="sidefoot"><div class="eyebrow">HOST CONNECTION</div><div style="margin:9px 0"><span class="dot"></span> <strong style="font-size:12px">Not connected</strong></div><div class="tiny">The dashboard connects through your Cloudflare Worker.</div></div>
 </aside>
 <main class="main">
 <header class="topbar"><div><div class="eyebrow">CONTROL CENTER / 01</div><h1 id="pageTitle">Your server workspace.</h1><p id="pageDesc">Configure your worlds. Keep everything in one place.</p></div><div class="top-actions"><span class="pill"><span class="dot"></span> Backend offline</span><button class="btn primary" id="newServerTop">＋ New server</button></div></header>
@@ -49,9 +49,8 @@
 <button class="btn" id="refreshLogs">Refresh console logs</button></div></section>
 <section class="grid hidden" id="settingsView">
 <div class="card span8"><div class="cardhead"><div><h2>Connect SERVERFORGE</h2><div class="sub">Secure proxy through your Cloudflare Worker.</div></div><span class="tag" id="falixStateTag">DISCONNECTED</span></div>
-<div class="field"><label for="serverforgePassword">SERVERFORGE connection password</label><input id="serverforgePassword" type="password" autocomplete="off" placeholder="Enter the password saved in Cloudflare" spellcheck="false"><div class="sub">Use the SERVERFORGE_PASSWORD secret you set in Cloudflare—not your Falix API key. This is kept in this browser tab only.</div></div>
 <div style="display:flex;gap:9px;flex-wrap:wrap"><button class="btn primary" id="connectFalix">Connect and load servers</button><button class="btn" id="refreshFalix" disabled>Refresh servers</button><button class="btn danger" id="disconnectFalix">Disconnect</button></div>
-<div id="falixResult" class="notice">Not connected. Enter your SERVERFORGE connection password, then connect through the Cloudflare Worker.</div>
+<div id="falixResult" class="notice">Not connected. Connect through the Cloudflare Worker to load your Falix servers.</div>
 <div class="notice">Your Falix API key stays stored as a secret in Cloudflare and is never included in this public website.</div>
 </div>
 <div class="card span4"><div class="cardhead"><h2>Connection details</h2></div><div class="sub" id="falixAccount">No Falix account loaded.</div><div class="notice">Falix may require verification before starting a free server. If an action URL is returned, SERVERFORGE will show a link to complete it.</div></div>
@@ -63,14 +62,11 @@
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 
 const WORKER_API='https://serverforge-api.colton-tharp.workers.dev';
-let workerPassword=sessionStorage.getItem('serverforge_password')||'';
 let falixServers=[];
 let falixUser=null;
-if(workerPassword) $('#serverforgePassword').value=workerPassword;
 function falixError(data,status){const e=data?.error||{};let msg=e.message||e.code||('HTTP '+status);if(e.action_url)msg+=' | Verification required: '+e.action_url;return msg}
 async function falixRequest(path,options={}){
- if(!workerPassword)throw new Error('Enter your SERVERFORGE connection password first.');
- const headers={'X-Serverforge-Password':workerPassword,Accept:'application/json',...(options.headers||{})};
+ const headers={'Accept':'application/json',...(options.headers||{})};
  if(options.body&&!headers['Content-Type'])headers['Content-Type']='application/json';
  let response;
  try{response=await fetch(WORKER_API+'/api'+path,{...options,headers,signal:options.signal||AbortSignal.timeout(12000)})}
@@ -95,14 +91,10 @@ async function loadFalixServers(){
  log('Loaded '+falixServers.length+' Falix server(s).','good');
 }
 async function connectFalix(){
- const typed=$('#serverforgePassword').value;
- if(typed)workerPassword=typed;
- if(!workerPassword){$('#falixResult').textContent='Enter your SERVERFORGE connection password first.';return}
  $('#falixResult').textContent='Checking the Cloudflare Worker and Falix connection…';
  try{
   const me=await falixRequest('/me');
   falixUser=me.account||me;
-  sessionStorage.setItem('serverforge_password',workerPassword);
   $('#falixAccount').textContent='Connected as '+(falixUser.username||falixUser.name||'Falix account')+'. Scopes: '+((me.key?.scopes||[]).join(', ')||'scope details not returned');
   setFalixState(true);
   await loadFalixServers();
@@ -121,7 +113,7 @@ async function loadFalixLogs(id){
 $('#connectFalix').addEventListener('click',connectFalix);
 $('#refreshFalix').addEventListener('click',()=>loadFalixServers().catch(err=>{$('#falixResult').textContent=err.message}));
 $('#refreshFalixList').addEventListener('click',()=>loadFalixServers().catch(err=>{$('#falixResult').textContent=err.message}));
-$('#disconnectFalix').addEventListener('click',()=>{workerPassword='';falixServers=[];falixUser=null;sessionStorage.removeItem('serverforge_password');$('#serverforgePassword').value='';$('#falixAccount').textContent='No Falix account loaded.';$('#falixResult').textContent='Disconnected. The connection password was removed from this browser tab.';$('#falixServerList').innerHTML='<div class="empty">Connect Falix in Backend settings to load your real servers.</div>';setFalixState(false);renderFalixServers();log('Falix disconnected.','warn')});
+$('#disconnectFalix').addEventListener('click',()=>{falixServers=[];falixUser=null;$('#falixAccount').textContent='No Falix account loaded.';$('#falixResult').textContent='Disconnected from Falix.';$('#falixServerList').innerHTML='<div class="empty">Connect Falix in Backend settings to load your real servers.</div>';setFalixState(false);renderFalixServers();log('Falix disconnected.','warn')});
 document.addEventListener('click',e=>{const power=e.target.closest('[data-power]');if(power)falixPower(power.dataset.server,power.dataset.power);const logs=e.target.closest('[data-logs]');if(logs)loadFalixLogs(logs.dataset.logs)});
 $('#sendCommand').addEventListener('click',async()=>{const id=$('#consoleServer').value;const command=$('#command').value.trim();if(!id){log('Select a server first.','warn');return}if(!command||/[\r\n]/.test(command)){log('Enter a single-line console command.','warn');return}try{const data=await falixRequest('/servers/'+encodeURIComponent(id)+'/commands',{method:'POST',body:JSON.stringify({command})});log('Command accepted: '+command+' '+JSON.stringify(data),'good');$('#command').value=''}catch(err){log('Command failed: '+err.message,'warn')}});
 $('#refreshLogs').addEventListener('click',()=>{const id=$('#consoleServer').value;if(id)loadFalixLogs(id);else log('Select a server first.','warn')});
@@ -146,7 +138,6 @@ document.addEventListener('click',e=>{const edit=e.target.closest('[data-edit]')
 $('#modalCancel').addEventListener('click',()=>{$('#modal').classList.add('hidden');pendingDelete=null});
 $('#modalConfirm').addEventListener('click',()=>{if(pendingDelete){const p=profiles.find(x=>x.id===pendingDelete);profiles=profiles.filter(x=>x.id!==pendingDelete);persist();log('Deleted local profile: '+(p?.name||pendingDelete),'warn')}$('#modal').classList.add('hidden');pendingDelete=null});
 $('#clearConsole').addEventListener('click',()=>$('#consoleOutput').textContent='Console cleared. Waiting for backend connection.');
-if(workerPassword){$('#serverforgePassword').value=workerPassword;setFalixState(false);$('#falixResult').textContent='A connection password is available in this tab. Click Connect and load servers to test the Worker.';}
 render();
 </script>
 </body></html>
