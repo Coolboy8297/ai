@@ -15,7 +15,7 @@
 <aside class="sidebar">
 <div class="brand"><div class="logo">S</div><div><strong>SERVERFORGE</strong><small>GAME SERVER CONTROL</small></div></div>
 <div><div class="navlabel">WORKSPACE</div><nav class="nav"><button class="active" data-view="overview"><span class="ico">◈</span>Overview</button><button data-view="servers"><span class="ico">▦</span>My servers</button><button data-view="create"><span class="ico">＋</span>Create server</button><button data-view="console"><span class="ico">⌘</span>Console</button><button data-view="settings"><span class="ico">⚙</span>Backend settings</button></nav></div>
-<div class="sidefoot"><div class="eyebrow">HOST CONNECTION</div><div style="margin:9px 0"><span class="dot"></span> <strong style="font-size:12px">Not connected</strong></div><div class="tiny">The dashboard is ready for a backend adapter. No server is started until a real provider is connected.</div></div>
+<div class="sidefoot"><div class="eyebrow">HOST CONNECTION</div><div style="margin:9px 0"><span class="dot"></span> <strong style="font-size:12px">Not connected</strong></div><div class="tiny">The dashboard connects through your Cloudflare Worker once the connection password is configured.</div></div>
 </aside>
 <main class="main">
 <header class="topbar"><div><div class="eyebrow">CONTROL CENTER / 01</div><h1 id="pageTitle">Your server workspace.</h1><p id="pageDesc">Configure your worlds. Keep everything in one place.</p></div><div class="top-actions"><span class="pill"><span class="dot"></span> Backend offline</span><button class="btn primary" id="newServerTop">＋ New server</button></div></header>
@@ -48,33 +48,33 @@
 <div class="field" style="margin-top:13px"><label for="command">Console command</label><div class="twocol"><input id="command" placeholder="e.g. say Hello everyone"><button class="btn primary" id="sendCommand">Send command</button></div></div>
 <button class="btn" id="refreshLogs">Refresh console logs</button></div></section>
 <section class="grid hidden" id="settingsView">
-<div class="card span8"><div class="cardhead"><div><h2>Connect Falix</h2><div class="sub">Direct browser-to-Falix API connection. No separate backend.</div></div><span class="tag" id="falixStateTag">DISCONNECTED</span></div>
-<div class="field"><label for="falixKey">Falix API key</label><input id="falixKey" type="password" autocomplete="off" placeholder="flx_live_..." spellcheck="false"><div class="sub">Enter it here; it is kept in this browser tab only and is not written into the GitHub repository.</div></div>
+<div class="card span8"><div class="cardhead"><div><h2>Connect SERVERFORGE</h2><div class="sub">Secure proxy through your Cloudflare Worker.</div></div><span class="tag" id="falixStateTag">DISCONNECTED</span></div>
+<div class="field"><label for="serverforgePassword">SERVERFORGE connection password</label><input id="serverforgePassword" type="password" autocomplete="off" placeholder="Enter the password saved in Cloudflare" spellcheck="false"><div class="sub">Use the SERVERFORGE_PASSWORD secret you set in Cloudflare—not your Falix API key. This is kept in this browser tab only.</div></div>
 <div style="display:flex;gap:9px;flex-wrap:wrap"><button class="btn primary" id="connectFalix">Connect and load servers</button><button class="btn" id="refreshFalix" disabled>Refresh servers</button><button class="btn danger" id="disconnectFalix">Disconnect</button></div>
-<div id="falixResult" class="notice">Not connected. Connect to validate your key and check whether Falix allows direct browser requests.</div>
-<div class="notice">Direct browser access may be blocked by Falix CORS policy. If it is blocked, this page cannot bypass that restriction without a backend.</div>
+<div id="falixResult" class="notice">Not connected. Enter your SERVERFORGE connection password, then connect through the Cloudflare Worker.</div>
+<div class="notice">Your Falix API key stays stored as a secret in Cloudflare and is never included in this public website.</div>
 </div>
 <div class="card span4"><div class="cardhead"><h2>Connection details</h2></div><div class="sub" id="falixAccount">No Falix account loaded.</div><div class="notice">Falix may require verification before starting a free server. If an action URL is returned, SERVERFORGE will show a link to complete it.</div></div>
 </section>
-<div class="footnote">SERVERFORGE prototype · Profiles are saved in this browser only. Clearing site data removes them. Live hosting is not yet connected.</div>
+<div class="footnote">SERVERFORGE · Local profiles are saved in this browser. Live controls require a working Cloudflare Worker and supported Falix API endpoints.</div>
 </main></div>
 <div class="modalback hidden" id="modal"><div class="modal"><div class="eyebrow">SERVERFORGE</div><h2 id="modalTitle">Delete profile?</h2><p id="modalText">This removes the saved profile from this browser. It does not affect a hosted server.</p><div class="modal-actions"><button class="btn ghost" id="modalCancel">Cancel</button><button class="btn danger" id="modalConfirm">Delete profile</button></div></div></div>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 
-const FALIX_API='https://client.falixnodes.net/api/v2';
-let falixKey=sessionStorage.getItem('serverforge_falix_key')||'';
+const WORKER_API='https://serverforge-api.colton-tharp.workers.dev';
+let workerPassword=sessionStorage.getItem('serverforge_password')||'';
 let falixServers=[];
 let falixUser=null;
-if(falixKey) $('#falixKey').value=falixKey;
+if(workerPassword) $('#serverforgePassword').value=workerPassword;
 function falixError(data,status){const e=data?.error||{};let msg=e.message||e.code||('HTTP '+status);if(e.action_url)msg+=' | Verification required: '+e.action_url;return msg}
 async function falixRequest(path,options={}){
- if(!falixKey)throw new Error('Enter your Falix API key first.');
- const headers={Authorization:'Bearer '+falixKey,Accept:'application/json',...(options.headers||{})};
+ if(!workerPassword)throw new Error('Enter your SERVERFORGE connection password first.');
+ const headers={'X-Serverforge-Password':workerPassword,Accept:'application/json',...(options.headers||{})};
  if(options.body&&!headers['Content-Type'])headers['Content-Type']='application/json';
  let response;
- try{response=await fetch(FALIX_API+path,{...options,headers,signal:options.signal||AbortSignal.timeout(12000)})}
- catch(err){if(err.name==='AbortError'||err.name==='TimeoutError')throw new Error('Request timed out.');if(err instanceof TypeError)throw new Error('Browser request failed. Falix may block direct browser access through CORS.');throw err}
+ try{response=await fetch(WORKER_API+'/api'+path,{...options,headers,signal:options.signal||AbortSignal.timeout(12000)})}
+ catch(err){if(err.name==='AbortError'||err.name==='TimeoutError')throw new Error('Request timed out.');if(err instanceof TypeError)throw new Error('Could not reach the SERVERFORGE Cloudflare Worker. Check the Worker URL and deployment.');throw err}
  let body={};try{body=await response.json()}catch{}
  if(!response.ok)throw new Error(falixError(body,response.status));
  return body.data??body;
@@ -95,18 +95,18 @@ async function loadFalixServers(){
  log('Loaded '+falixServers.length+' Falix server(s).','good');
 }
 async function connectFalix(){
- const typed=$('#falixKey').value.trim();
- if(typed)falixKey=typed;
- if(!falixKey){$('#falixResult').textContent='Paste your Falix API key in the field first.';return}
- $('#falixResult').textContent='Checking Falix API key…';
+ const typed=$('#serverforgePassword').value;
+ if(typed)workerPassword=typed;
+ if(!workerPassword){$('#falixResult').textContent='Enter your SERVERFORGE connection password first.';return}
+ $('#falixResult').textContent='Checking the Cloudflare Worker and Falix connection…';
  try{
   const me=await falixRequest('/me');
   falixUser=me.account||me;
-  sessionStorage.setItem('serverforge_falix_key',falixKey);
+  sessionStorage.setItem('serverforge_password',workerPassword);
   $('#falixAccount').textContent='Connected as '+(falixUser.username||falixUser.name||'Falix account')+'. Scopes: '+((me.key?.scopes||[]).join(', ')||'scope details not returned');
   setFalixState(true);
   await loadFalixServers();
-  log('Falix API key validated successfully.','good');
+  log('SERVERFORGE Worker connection validated successfully.','good');
  }catch(err){$('#falixResult').textContent='Connection failed: '+err.message;setFalixState(false);log('Falix connection failed: '+err.message,'warn')}
 }
 async function falixPower(id,signal){
@@ -121,7 +121,7 @@ async function loadFalixLogs(id){
 $('#connectFalix').addEventListener('click',connectFalix);
 $('#refreshFalix').addEventListener('click',()=>loadFalixServers().catch(err=>{$('#falixResult').textContent=err.message}));
 $('#refreshFalixList').addEventListener('click',()=>loadFalixServers().catch(err=>{$('#falixResult').textContent=err.message}));
-$('#disconnectFalix').addEventListener('click',()=>{falixKey='';falixServers=[];falixUser=null;sessionStorage.removeItem('serverforge_falix_key');$('#falixKey').value='';$('#falixAccount').textContent='No Falix account loaded.';$('#falixResult').textContent='Disconnected. The key was removed from this browser tab.';$('#falixServerList').innerHTML='<div class="empty">Connect Falix in Backend settings to load your real servers.</div>';setFalixState(false);renderFalixServers();log('Falix disconnected.','warn')});
+$('#disconnectFalix').addEventListener('click',()=>{workerPassword='';falixServers=[];falixUser=null;sessionStorage.removeItem('serverforge_password');$('#serverforgePassword').value='';$('#falixAccount').textContent='No Falix account loaded.';$('#falixResult').textContent='Disconnected. The connection password was removed from this browser tab.';$('#falixServerList').innerHTML='<div class="empty">Connect Falix in Backend settings to load your real servers.</div>';setFalixState(false);renderFalixServers();log('Falix disconnected.','warn')});
 document.addEventListener('click',e=>{const power=e.target.closest('[data-power]');if(power)falixPower(power.dataset.server,power.dataset.power);const logs=e.target.closest('[data-logs]');if(logs)loadFalixLogs(logs.dataset.logs)});
 $('#sendCommand').addEventListener('click',async()=>{const id=$('#consoleServer').value;const command=$('#command').value.trim();if(!id){log('Select a server first.','warn');return}if(!command||/[\r\n]/.test(command)){log('Enter a single-line console command.','warn');return}try{const data=await falixRequest('/servers/'+encodeURIComponent(id)+'/commands',{method:'POST',body:JSON.stringify({command})});log('Command accepted: '+command+' '+JSON.stringify(data),'good');$('#command').value=''}catch(err){log('Command failed: '+err.message,'warn')}});
 $('#refreshLogs').addEventListener('click',()=>{const id=$('#consoleServer').value;if(id)loadFalixLogs(id);else log('Select a server first.','warn')});
@@ -146,7 +146,7 @@ document.addEventListener('click',e=>{const edit=e.target.closest('[data-edit]')
 $('#modalCancel').addEventListener('click',()=>{$('#modal').classList.add('hidden');pendingDelete=null});
 $('#modalConfirm').addEventListener('click',()=>{if(pendingDelete){const p=profiles.find(x=>x.id===pendingDelete);profiles=profiles.filter(x=>x.id!==pendingDelete);persist();log('Deleted local profile: '+(p?.name||pendingDelete),'warn')}$('#modal').classList.add('hidden');pendingDelete=null});
 $('#clearConsole').addEventListener('click',()=>$('#consoleOutput').textContent='Console cleared. Waiting for backend connection.');
-if(falixKey){$('#falixKey').value=falixKey;setFalixState(false);$('#falixResult').textContent='A key is available in this tab. Click Connect and load servers to validate it.';}
+if(workerPassword){$('#serverforgePassword').value=workerPassword;setFalixState(false);$('#falixResult').textContent='A connection password is available in this tab. Click Connect and load servers to test the Worker.';}
 render();
 </script>
 </body></html>
