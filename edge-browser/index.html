@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#202124">
+<title>EdgeLite — Web Browser</title>
+<style>
+:root{color-scheme:dark;--bg:#202124;--panel:#292a2d;--panel2:#35363a;--line:#414247;--text:#e8eaed;--muted:#aeb3bb;--blue:#8ab4f8}
+*{box-sizing:border-box}
+body{margin:0;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);font:14px/1.4 "Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column}
+.top{padding:9px 12px 0;background:#202124}
+.tabs{display:flex;gap:5px;align-items:center;min-height:34px}
+.tab{height:32px;max-width:230px;min-width:130px;flex:1;border-radius:9px 9px 0 0;background:#303136;color:var(--muted);display:flex;align-items:center;gap:8px;padding:0 12px;cursor:pointer;border:1px solid transparent}
+.tab.active{background:var(--panel);color:var(--text);border-color:#3c3d41}
+.tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.iconbtn{border:0;background:transparent;color:var(--text);width:34px;height:34px;border-radius:50%;font-size:19px;cursor:pointer}
+.iconbtn:hover{background:var(--panel2)}
+.toolbar{display:flex;align-items:center;gap:5px;padding:8px 0 10px}
+.navbtn{flex:0 0 34px}
+.address{height:40px;display:flex;align-items:center;gap:9px;flex:1;min-width:0;border:1px solid transparent;background:#303136;border-radius:24px;padding:0 14px}
+.address:focus-within{background:#252629;border-color:#6b9ce8}
+.address .lock{color:#aeb3bb}
+input{width:100%;min-width:0;background:transparent;border:0;outline:0;color:var(--text);font:inherit}
+main{position:relative;flex:1;min-height:0;background:#fff}
+#view{height:100%;width:100%;border:0;background:#fff}
+.home{height:100%;overflow:auto;background:radial-gradient(ellipse at 50% 18%,#293c57 0,transparent 52%),#202124;display:flex;align-items:center;flex-direction:column;padding:8vh 20px 35px}
+.logo{font-size:clamp(36px,7vw,62px);font-weight:650;letter-spacing:-2px;margin:20px 0 22px}
+.logo b{font-weight:650;color:#8ab4f8}
+.searchbox{display:flex;align-items:center;gap:12px;width:min(650px,100%);height:52px;border:1px solid #55565b;border-radius:28px;background:#303136;padding:0 18px}
+.searchbox:focus-within,.searchbox:hover{background:#37383c;box-shadow:0 2px 8px #0004}
+.shortcuts{display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-top:34px;max-width:650px}
+.shortcut{width:100px;text-align:center;color:var(--text);text-decoration:none;padding:12px 5px;border-radius:12px}
+.shortcut:hover{background:#ffffff12}
+.bubble{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;margin:0 auto 9px;background:#35363a;font-size:19px}
+.note{margin-top:38px;max-width:610px;text-align:center;color:var(--muted);font-size:13px}
+#notice{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:min(570px,calc(100% - 28px));padding:15px 17px;background:#292a2d;color:var(--text);border:1px solid #55565b;border-radius:14px;box-shadow:0 6px 28px #0008;display:none}
+#notice strong{display:block;margin-bottom:4px}
+#notice p{margin:0 0 12px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.action{background:#3c4043;color:var(--text);border:1px solid #5f6368;padding:8px 12px;border-radius:20px;cursor:pointer;text-decoration:none;font:inherit}
+.action.primary{background:#8ab4f8;color:#172033;border-color:#8ab4f8}
+@media(max-width:600px){.top{padding:6px 6px 0}.toolbar{gap:1px}.navbtn{flex-basis:31px;width:31px}.address{padding:0 10px}.tab{min-width:90px}.logo{margin-top:12vh}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="0" aria-label="Current tab"><span>New tab</span><button class="iconbtn" id="newtab" title="New tab" aria-label="New tab">+</button>
+  </div>
+  <div class="toolbar">
+    <button class="iconbtn navbtn" id="back" title="Back" aria-label="Back">‹</button>
+    <button class="iconbtn navbtn" id="forward" title="Forward" aria-label="Forward">›</button>
+    <button class="iconbtn navbtn" id="reload" title="Reload" aria-label="Reload">↻</button>
+    <button class="iconbtn navbtn" id="homebtn" title="Home" aria-label="Home">⌂</button>
+    <form class="address" id="navform">
+      <span class="lock">◉</span>
+      <input id="url" type="text" autocomplete="off" spellcheck="false" placeholder="Search or enter web address" aria-label="Search or enter web address">
+      <button class="iconbtn" type="submit" title="Go" aria-label="Go">↵</button>
+    </form>
+    <button class="iconbtn" id="openoutside" title="Open page in a new browser tab" aria-label="Open externally">↗</button>
+  </div>
+</header>
+<main id="stage">
+  <section class="home" id="home">
+    <div class="logo">Edge<b>Lite</b></div>
+    <form class="searchbox" id="searchform"><span style="font-size:19px;color:#aeb3bb">⌕</span><input id="homesearch" placeholder="Search the web or enter an address" aria-label="Search the web or enter an address"></form>
+    <div class="shortcuts">
+      <a class="shortcut" href="#" data-url="https://www.bing.com"><span class="bubble">B</span>Bing</a>
+      <a class="shortcut" href="#" data-url="https://www.wikipedia.org"><span class="bubble">W</span>Wikipedia</a>
+      <a class="shortcut" href="#" data-url="https://github.com"><span class="bubble">⌘</span>GitHub</a>
+      <a class="shortcut" href="#" data-url="https://www.youtube.com"><span class="bubble">▶</span>YouTube</a>
+    </div>
+    <p class="note">Edge-inspired browser interface. Some websites block being displayed inside another website. When that happens, use “Open externally” to view the page in a regular browser tab.</p>
+  </section>
+  <iframe id="view" title="Website view" hidden referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-downloads"></iframe>
+  <aside id="notice" role="status">
+    <strong>This website may not allow embedded browsing.</strong>
+    <p>Some sites block iframes or require browser features this demo cannot provide. Open the page in a regular browser tab instead. This prototype cannot bypass those restrictions.</p>
+    <div class="actions"><button class="action primary" id="tryagain">Try loading again</button><button class="action" id="external">Open in new tab</button><button class="action" id="dismiss">Dismiss</button></div>
+  </aside>
+</main>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const view=$('view'), home=$('home'), urlInput=$('url'), notice=$('notice'), tabsEl=$('tabs');
+  let currentUrl='', activeTab=0, nextTab=1;
+  const tabs=[{id:0,title:'New tab',url:'',history:[],index:-1}];
+  function normalize(value){
+    value=value.trim();
+    if(!value) return '';
+    if(/^https?:\/\//i.test(value)) return value;
+    if(value.includes(' ') || !value.includes('.') || /^(search|images|videos)\s/i.test(value))
+      return 'https://www.bing.com/search?q='+encodeURIComponent(value);
+    return 'https://'+value;
+  }
+  function renderTabs(){
+    tabsEl.querySelectorAll('.tab').forEach(n=>n.remove());
+    tabs.forEach(t=>{
+      const b=document.createElement('button'); b.className='tab'+(t.id===activeTab?' active':''); b.type='button';
+      const s=document.createElement('span');s.textContent=t.title||'New tab';b.append(s);
+      const x=document.createElement('span');x.textContent='×';x.style.flex='0 0 auto';x.title='Close tab';
+      x.addEventListener('click',e=>{e.stopPropagation();closeTab(t.id)});b.append(x);
+      b.addEventListener('click',()=>switchTab(t.id));tabsEl.insertBefore(b,$('newtab'));
+    });
+  }
+  function active(){return tabs.find(t=>t.id===activeTab)}
+  function switchTab(id){activeTab=id;const t=active();currentUrl=t.url;urlInput.value=t.url;notice.style.display='none';renderTabs();if(t.url)load(t.url,false);else showHome()}
+  function closeTab(id){
+    if(tabs.length===1){const t=active();t.url='';t.history=[];t.index=-1;switchTab(id);return}
+    const i=tabs.findIndex(t=>t.id===id);tabs.splice(i,1);
+    if(activeTab===id) activeTab=tabs[Math.max(0,i-1)].id;
+    switchTab(activeTab);
+  }
+  function showHome(){currentUrl='';view.hidden=true;view.src='about:blank';home.hidden=false;notice.style.display='none';urlInput.value='';active().url='';active().title='New tab';renderTabs()}
+  function load(url,addHistory=true){
+    if(!url)return;
+    currentUrl=url;const t=active();t.url=url;t.title=new URL(url).hostname.replace(/^www\./,'')||'Website';
+    if(addHistory){t.history=t.history.slice(0,t.index+1);t.history.push(url);t.index=t.history.length-1}
+    urlInput.value=url;home.hidden=true;view.hidden=false;notice.style.display='none';view.src=url;renderTabs();
+  }
+  function navigate(raw){const u=normalize(raw);if(u)load(u)}
+  $('navform').addEventListener('submit',e=>{e.preventDefault();navigate(urlInput.value)});
+  $('searchform').addEventListener('submit',e=>{e.preventDefault();navigate($('homesearch').value)});
+  $('back').addEventListener('click',()=>{const t=active();if(t.index>0){t.index--;load(t.history[t.index],false)}});
+  $('forward').addEventListener('click',()=>{const t=active();if(t.index<t.history.length-1){t.index++;load(t.history[t.index],false)}});
+  $('reload').addEventListener('click',()=>{if(currentUrl)load(currentUrl,false);else showHome()});
+  $('homebtn').addEventListener('click',showHome);
+  $('newtab').addEventListener('click',()=>{const id=nextTab++;tabs.push({id,title:'New tab',url:'',history:[],index:-1});switchTab(id)});
+  $('openoutside').addEventListener('click',()=>{if(currentUrl)window.open(currentUrl,'_blank','noopener,noreferrer')});
+  $('tryagain').addEventListener('click',()=>{if(currentUrl)load(currentUrl,false)});
+  $('external').addEventListener('click',()=>{if(currentUrl)window.open(currentUrl,'_blank','noopener,noreferrer')});
+  $('dismiss').addEventListener('click',()=>notice.style.display='none');
+  view.addEventListener('load',()=>{if(currentUrl && !view.hidden){try{const title=view.contentDocument.title;if(title)active().title=title;renderTabs()}catch(e){/* Cross-origin page: expected. */}}});
+  view.addEventListener('error',()=>{notice.style.display='block'});
+  document.querySelectorAll('[data-url]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();navigate(a.dataset.url)}));
+  urlInput.addEventListener('keydown',e=>{if(e.key==='Escape')showHome()});
+  renderTabs();
+})();
+</script>
+</body>
+</html>
