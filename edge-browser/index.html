@@ -13,7 +13,15 @@ body{margin:0;height:100vh;overflow:hidden;background:var(--bg);color:var(--text
 .tabs{display:flex;gap:5px;align-items:center;min-height:34px}
 .tab{height:32px;max-width:230px;min-width:130px;flex:1;border-radius:9px 9px 0 0;background:#303136;color:var(--muted);display:flex;align-items:center;gap:8px;padding:0 12px;cursor:pointer;border:1px solid transparent}
 .tab.active{background:var(--panel);color:var(--text);border-color:#3c3d41}
-.tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.tab .tab-icon{width:17px;height:17px;flex:0 0 17px;border-radius:4px;display:grid;place-items:center;background:#45474d;color:#dce6f8;font-size:10px;font-weight:800}
+.tab .tab-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left}
+.tab .tab-close{flex:0 0 20px;width:20px;height:20px;border:0;border-radius:50%;background:transparent;color:inherit;cursor:pointer;font-size:16px;line-height:18px;padding:0}
+.tab .tab-close:hover{background:#55565b}
+.tab.active{box-shadow:0 -1px 0 #8ab4f8 inset}
+.tab{min-width:0;flex:0 1 220px}
+#newtab{flex:0 0 34px}
+.tab .tab-spinner{width:13px;height:13px;border:2px solid #777;border-top-color:#8ab4f8;border-radius:50%;animation:spin .8s linear infinite;flex:0 0 13px}
+@keyframes spin{to{transform:rotate(360deg)}}
 .iconbtn{border:0;background:transparent;color:var(--text);width:34px;height:34px;border-radius:50%;font-size:19px;cursor:pointer}
 .iconbtn:hover{background:var(--panel2)}
 .toolbar{display:flex;align-items:center;gap:5px;padding:8px 0 10px}
@@ -46,7 +54,7 @@ main{position:relative;flex:1;min-height:0;background:#fff}
 <body>
 <header class="top">
   <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="0" aria-label="Current tab"><span>New tab</span><button class="iconbtn" id="newtab" title="New tab" aria-label="New tab">+</button>
+    <button class="iconbtn" id="newtab" title="New tab" aria-label="New tab">+</button>
   </div>
   <div class="toolbar">
     <button class="iconbtn navbtn" id="back" title="Back" aria-label="Back">‹</button>
@@ -85,7 +93,7 @@ main{position:relative;flex:1;min-height:0;background:#fff}
   const $ = id => document.getElementById(id);
   const view=$('view'), home=$('home'), urlInput=$('url'), notice=$('notice'), tabsEl=$('tabs');
   let currentUrl='', activeTab=0, nextTab=1;
-  const tabs=[{id:0,title:'New tab',url:'',history:[],index:-1}];
+  const tabs=[{id:0,title:'New tab',url:'',history:[],index:-1,loading:false}];
   function normalize(value){
     value=value.trim();
     if(!value) return '';
@@ -97,9 +105,11 @@ main{position:relative;flex:1;min-height:0;background:#fff}
   function renderTabs(){
     tabsEl.querySelectorAll('.tab').forEach(n=>n.remove());
     tabs.forEach(t=>{
-      const b=document.createElement('button'); b.className='tab'+(t.id===activeTab?' active':''); b.type='button';
-      const s=document.createElement('span');s.textContent=t.title||'New tab';b.append(s);
-      const x=document.createElement('span');x.textContent='×';x.style.flex='0 0 auto';x.title='Close tab';
+      const b=document.createElement('button'); b.className='tab'+(t.id===activeTab?' active':''); b.type='button';b.title=t.url||'New tab';
+      const icon=document.createElement('span');icon.className='tab-icon';icon.textContent=t.url?new URL(t.url).hostname.replace(/^www\\./,'').slice(0,1).toUpperCase():'＋';b.append(icon);
+      const s=document.createElement('span');s.className='tab-title';s.textContent=t.title||'New tab';b.append(s);
+      if(t.loading){const spin=document.createElement('span');spin.className='tab-spinner';b.append(spin)}
+      const x=document.createElement('button');x.className='tab-close';x.type='button';x.textContent='×';x.title='Close tab';
       x.addEventListener('click',e=>{e.stopPropagation();closeTab(t.id)});b.append(x);
       b.addEventListener('click',()=>switchTab(t.id));tabsEl.insertBefore(b,$('newtab'));
     });
@@ -112,7 +122,7 @@ main{position:relative;flex:1;min-height:0;background:#fff}
     if(activeTab===id) activeTab=tabs[Math.max(0,i-1)].id;
     switchTab(activeTab);
   }
-  function showHome(){currentUrl='';view.hidden=true;view.src='about:blank';home.hidden=false;notice.style.display='none';urlInput.value='';active().url='';active().title='New tab';renderTabs()}
+  function showHome(){currentUrl='';view.hidden=true;view.src='about:blank';home.hidden=false;notice.style.display='none';urlInput.value='';active().url='';active().title='New tab';active().loading=false;renderTabs()}
   function load(url,addHistory=true){
     if(!url)return;
     currentUrl=url;const t=active();t.url=url;t.title=new URL(url).hostname.replace(/^www\./,'')||'Website';
@@ -126,13 +136,13 @@ main{position:relative;flex:1;min-height:0;background:#fff}
   $('forward').addEventListener('click',()=>{const t=active();if(t.index<t.history.length-1){t.index++;load(t.history[t.index],false)}});
   $('reload').addEventListener('click',()=>{if(currentUrl)load(currentUrl,false);else showHome()});
   $('homebtn').addEventListener('click',showHome);
-  $('newtab').addEventListener('click',()=>{const id=nextTab++;tabs.push({id,title:'New tab',url:'',history:[],index:-1});switchTab(id)});
+  $('newtab').addEventListener('click',()=>{const id=nextTab++;tabs.push({id,title:'New tab',url:'',history:[],index:-1,loading:false});switchTab(id)});
   $('openoutside').addEventListener('click',()=>{if(currentUrl)window.open(currentUrl,'_blank','noopener,noreferrer')});
   $('tryagain').addEventListener('click',()=>{if(currentUrl)load(currentUrl,false)});
   $('external').addEventListener('click',()=>{if(currentUrl)window.open(currentUrl,'_blank','noopener,noreferrer')});
   $('dismiss').addEventListener('click',()=>notice.style.display='none');
-  view.addEventListener('load',()=>{if(currentUrl && !view.hidden){try{const title=view.contentDocument.title;if(title)active().title=title;renderTabs()}catch(e){/* Cross-origin page: expected. */}}});
-  view.addEventListener('error',()=>{notice.style.display='block'});
+  view.addEventListener('load',()=>{if(currentUrl && !view.hidden){active().loading=false;try{const title=view.contentDocument.title;if(title)active().title=title;}catch(e){/* Cross-origin pages cannot expose their title to this website. */}renderTabs()}});
+  view.addEventListener('error',()=>{active().loading=false;renderTabs();notice.style.display='block'});
   document.querySelectorAll('[data-url]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();navigate(a.dataset.url)}));
   urlInput.addEventListener('keydown',e=>{if(e.key==='Escape')showHome()});
   renderTabs();
