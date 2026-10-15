@@ -38,15 +38,94 @@
 <div style="display:flex;gap:9px;flex-wrap:wrap"><button class="btn primary" type="submit">Save server profile</button><button class="btn ghost" type="button" id="cancelCreate">Cancel</button></div></form></div>
 <div class="card span4"><div class="cardhead"><h2>Compatibility notes</h2></div><p class="sub">Vanilla runs without mods or plugins. Paper is built for plugins. Fabric, Forge and NeoForge are mod loaders; the game version and mod versions must match.</p><div class="notice">The version list is a starter list, not a live manifest. Before deployment, the backend should validate that the selected software/version combination actually exists.</div><div class="notice">Resource limits are estimates. A free host may impose lower RAM, storage, player, or uptime limits.</div></div>
 </section>
-<section class="grid hidden" id="serversView"><div class="card span12"><div class="cardhead"><div><h2>My server profiles</h2><div class="sub">Stored in this browser only until account storage is added.</div></div><button class="btn primary" id="newServerList">＋ New profile</button></div><div class="serverlist" id="serverListFull"></div></div></section>
-<section class="grid hidden" id="consoleView"><div class="card span12"><div class="cardhead"><div><h2>Console</h2><div class="sub">Backend connection and provisioning events</div></div><button class="btn" id="clearConsole">Clear console</button></div><div class="console" id="consoleOutput"><span class="good">[SERVERFORGE]</span> Dashboard initialized.
-<span class="warn">[WAITING]</span> No hosting backend connected. Real server logs will appear here after integration.</div><div class="field" style="margin-top:13px"><label for="command">Console command (disabled until a real server is connected)</label><input id="command" disabled placeholder="e.g. say Hello everyone"><button class="btn" disabled>Send command</button></div></div></section>
-<section class="grid hidden" id="settingsView"><div class="card span8"><div class="cardhead"><div><h2>Backend connection</h2><div class="sub">Connect a server-side API that can provision and manage Minecraft servers.</div></div><span class="tag">NOT CONNECTED</span></div><div class="field"><label for="backendUrl">Backend base URL</label><input id="backendUrl" placeholder="https://your-backend.example.com"></div><div class="field"><label for="apiRoute">Health-check path</label><input id="apiRoute" value="/health"></div><button class="btn primary" id="testBackend">Test connection</button><div id="backendResult" class="notice">No URL saved. The backend must be yours or a trusted provider's, use HTTPS, and implement authenticated server-management endpoints.</div></div><div class="card span4"><div class="cardhead"><h2>Security checklist</h2></div><div class="sub" style="display:grid;gap:10px"><div>✓ Keep provider API keys on the backend.</div><div>✓ Require user authentication for start/stop actions.</div><div>✓ Validate software, versions, and file uploads.</div><div>✓ Apply per-user quotas and rate limits.</div><div>✓ Never run arbitrary submitted shell code as root.</div></div></div></section>
+<section class="grid hidden" id="serversView">
+<div class="card span12"><div class="cardhead"><div><h2>Falix servers</h2><div class="sub">Live servers returned by your connected Falix API key.</div></div><button class="btn" id="refreshFalixList" disabled>Refresh</button></div><div id="falixServerList" class="serverlist"><div class="empty">Connect Falix in Backend settings to load your real servers.</div></div></div>
+<div class="card span12"><div class="cardhead"><div><h2>Local profiles</h2><div class="sub">Draft configurations saved only in this browser; these are not hosted servers.</div></div><button class="btn primary" id="newServerList">＋ New profile</button></div><div class="serverlist" id="serverListFull"></div></div>
+</section>
+<section class="grid hidden" id="consoleView"><div class="card span12"><div class="cardhead"><div><h2>Console</h2><div class="sub">Recent logs and commands for a selected Falix server.</div></div><button class="btn" id="clearConsole">Clear console</button></div>
+<div class="field"><label for="consoleServer">Server</label><select id="consoleServer"><option value="">Connect Falix first</option></select></div>
+<div class="console" id="consoleOutput"><span class="good">[SERVERFORGE]</span> Dashboard initialized. Connect Falix to retrieve real server data.</div>
+<div class="field" style="margin-top:13px"><label for="command">Console command</label><div class="twocol"><input id="command" placeholder="e.g. say Hello everyone"><button class="btn primary" id="sendCommand">Send command</button></div></div>
+<button class="btn" id="refreshLogs">Refresh console logs</button></div></section>
+<section class="grid hidden" id="settingsView">
+<div class="card span8"><div class="cardhead"><div><h2>Connect Falix</h2><div class="sub">Direct browser-to-Falix API connection. No separate backend.</div></div><span class="tag" id="falixStateTag">DISCONNECTED</span></div>
+<div class="field"><label for="falixKey">Falix API key</label><input id="falixKey" type="password" autocomplete="off" placeholder="flx_live_..." spellcheck="false"><div class="sub">Enter it here; it is kept in this browser tab only and is not written into the GitHub repository.</div></div>
+<div style="display:flex;gap:9px;flex-wrap:wrap"><button class="btn primary" id="connectFalix">Connect and load servers</button><button class="btn" id="refreshFalix" disabled>Refresh servers</button><button class="btn danger" id="disconnectFalix">Disconnect</button></div>
+<div id="falixResult" class="notice">Not connected. Connect to validate your key and check whether Falix allows direct browser requests.</div>
+<div class="notice">Direct browser access may be blocked by Falix CORS policy. If it is blocked, this page cannot bypass that restriction without a backend.</div>
+</div>
+<div class="card span4"><div class="cardhead"><h2>Connection details</h2></div><div class="sub" id="falixAccount">No Falix account loaded.</div><div class="notice">Falix may require verification before starting a free server. If an action URL is returned, SERVERFORGE will show a link to complete it.</div></div>
+</section>
 <div class="footnote">SERVERFORGE prototype · Profiles are saved in this browser only. Clearing site data removes them. Live hosting is not yet connected.</div>
 </main></div>
 <div class="modalback hidden" id="modal"><div class="modal"><div class="eyebrow">SERVERFORGE</div><h2 id="modalTitle">Delete profile?</h2><p id="modalText">This removes the saved profile from this browser. It does not affect a hosted server.</p><div class="modal-actions"><button class="btn ghost" id="modalCancel">Cancel</button><button class="btn danger" id="modalConfirm">Delete profile</button></div></div></div>
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+const FALIX_API='https://client.falixnodes.net/api/v2';
+let falixKey=sessionStorage.getItem('serverforge_falix_key')||'';
+let falixServers=[];
+let falixUser=null;
+if(falixKey) $('#falixKey').value=falixKey;
+function falixError(data,status){const e=data?.error||{};let msg=e.message||e.code||('HTTP '+status);if(e.action_url)msg+=' | Verification required: '+e.action_url;return msg}
+async function falixRequest(path,options={}){
+ if(!falixKey)throw new Error('Enter your Falix API key first.');
+ const headers={Authorization:'Bearer '+falixKey,Accept:'application/json',...(options.headers||{})};
+ if(options.body&&!headers['Content-Type'])headers['Content-Type']='application/json';
+ let response;
+ try{response=await fetch(FALIX_API+path,{...options,headers,signal:options.signal||AbortSignal.timeout(12000)})}
+ catch(err){if(err.name==='AbortError'||err.name==='TimeoutError')throw new Error('Request timed out.');if(err instanceof TypeError)throw new Error('Browser request failed. Falix may block direct browser access through CORS.');throw err}
+ let body={};try{body=await response.json()}catch{}
+ if(!response.ok)throw new Error(falixError(body,response.status));
+ return body.data??body;
+}
+function setFalixState(connected){$('#falixStateTag').textContent=connected?'CONNECTED':'DISCONNECTED';$('#falixStateTag').style.color=connected?'var(--cyan)':'var(--orange)';$('#refreshFalix').disabled=!connected;$('#refreshFalixList').disabled=!connected;$('#sideFalixStatus')?.remove();const pill=$('.top-actions .pill');if(pill){pill.innerHTML='<span class="dot" style="background:'+(connected?'var(--cyan)':'var(--orange)')+'"></span> '+(connected?'Falix connected':'Backend offline')} }
+function renderFalixServers(){
+ const el=$('#falixServerList');const select=$('#consoleServer');
+ if(!falixServers.length){el.innerHTML='<div class="empty">No servers returned by Falix for this API key.</div>';select.innerHTML='<option value="">No servers available</option>';return}
+ el.innerHTML=falixServers.map(server=>{const id=server.id??server.server_id;const name=server.name||server.identifier||('Server '+id);const status=server.status?.state||server.state||'status unavailable';const online=String(status).toLowerCase()==='running'||String(status).toLowerCase()==='online';return '<div class="serveritem"><div class="servericon">▦</div><div class="servermeta"><strong>'+esc(name)+'</strong><small>Falix ID: '+esc(id)+' · '+esc(server.software?.name||server.software||'Minecraft')+'</small><div class="sub">Status: '+esc(status)+'</div></div><span class="pill"><span class="dot" style="background:'+(online?'var(--cyan)':'var(--orange)')+'"></span>'+esc(status)+'</span><button class="btn primary" data-power="start" data-server="'+esc(id)+'">Start</button><button class="btn" data-power="stop" data-server="'+esc(id)+'">Stop</button><button class="btn" data-logs="'+esc(id)+'">Logs</button></div>'}).join('');
+ select.innerHTML=falixServers.map(server=>'<option value="'+esc(server.id??server.server_id)+'">'+esc(server.name||server.identifier||('Server '+(server.id??server.server_id)))+'</option>').join('');
+}
+async function loadFalixServers(){
+ $('#falixResult').textContent='Loading your Falix servers…';
+ const result=await falixRequest('/servers?limit=100&include=status');
+ falixServers=Array.isArray(result)?result:(result.servers||[]);
+ renderFalixServers();
+ $('#falixResult').textContent='Connected. Loaded '+falixServers.length+' server(s) from Falix.';
+ log('Loaded '+falixServers.length+' Falix server(s).','good');
+}
+async function connectFalix(){
+ const typed=$('#falixKey').value.trim();
+ if(typed)falixKey=typed;
+ if(!falixKey){$('#falixResult').textContent='Paste your Falix API key in the field first.';return}
+ $('#falixResult').textContent='Checking Falix API key…';
+ try{
+  const me=await falixRequest('/me');
+  falixUser=me.account||me;
+  sessionStorage.setItem('serverforge_falix_key',falixKey);
+  $('#falixAccount').textContent='Connected as '+(falixUser.username||falixUser.name||'Falix account')+'. Scopes: '+((me.key?.scopes||[]).join(', ')||'scope details not returned');
+  setFalixState(true);
+  await loadFalixServers();
+  log('Falix API key validated successfully.','good');
+ }catch(err){$('#falixResult').textContent='Connection failed: '+err.message;setFalixState(false);log('Falix connection failed: '+err.message,'warn')}
+}
+async function falixPower(id,signal){
+ if(!confirm(signal.toUpperCase()+' server '+id+'?'))return;
+ try{const result=await falixRequest('/servers/'+encodeURIComponent(id)+'/power',{method:'POST',body:JSON.stringify({signal})});log(signal+' request accepted for server '+id+'. '+JSON.stringify(result),'good');if(result?.error?.action_url)window.open(result.error.action_url,'_blank','noopener');await loadFalixServers()}
+ catch(err){const match=err.message.match(/https?:\/\/\S+/);if(match&&/verification/i.test(err.message)){log(err.message,'warn');window.open(match[0],'_blank','noopener')}else log('Power action failed: '+err.message,'warn');$('#falixResult').textContent='Falix action: '+err.message}
+}
+async function loadFalixLogs(id){
+ try{const data=await falixRequest('/servers/'+encodeURIComponent(id)+'/console/log?lines=40');const lines=data.lines||[];$('#consoleOutput').textContent=lines.map(line=>typeof line==='string'?line:JSON.stringify(line)).join('\n')||'Falix returned no persisted console log for this server.';view('console');$('#consoleServer').value=String(id)}
+ catch(err){log('Could not load logs: '+err.message,'warn')}
+}
+$('#connectFalix').addEventListener('click',connectFalix);
+$('#refreshFalix').addEventListener('click',()=>loadFalixServers().catch(err=>{$('#falixResult').textContent=err.message}));
+$('#refreshFalixList').addEventListener('click',()=>loadFalixServers().catch(err=>{$('#falixResult').textContent=err.message}));
+$('#disconnectFalix').addEventListener('click',()=>{falixKey='';falixServers=[];falixUser=null;sessionStorage.removeItem('serverforge_falix_key');$('#falixKey').value='';$('#falixAccount').textContent='No Falix account loaded.';$('#falixResult').textContent='Disconnected. The key was removed from this browser tab.';$('#falixServerList').innerHTML='<div class="empty">Connect Falix in Backend settings to load your real servers.</div>';setFalixState(false);renderFalixServers();log('Falix disconnected.','warn')});
+document.addEventListener('click',e=>{const power=e.target.closest('[data-power]');if(power)falixPower(power.dataset.server,power.dataset.power);const logs=e.target.closest('[data-logs]');if(logs)loadFalixLogs(logs.dataset.logs)});
+$('#sendCommand').addEventListener('click',async()=>{const id=$('#consoleServer').value;const command=$('#command').value.trim();if(!id){log('Select a server first.','warn');return}if(!command||/[\r\n]/.test(command)){log('Enter a single-line console command.','warn');return}try{const data=await falixRequest('/servers/'+encodeURIComponent(id)+'/commands',{method:'POST',body:JSON.stringify({command})});log('Command accepted: '+command+' '+JSON.stringify(data),'good');$('#command').value=''}catch(err){log('Command failed: '+err.message,'warn')}});
+$('#refreshLogs').addEventListener('click',()=>{const id=$('#consoleServer').value;if(id)loadFalixLogs(id);else log('Select a server first.','warn')});
+
 const STORE='serverforge_profiles_v1';
 let profiles=[];let pendingDelete=null;
 try{profiles=JSON.parse(localStorage.getItem(STORE)||'[]');if(!Array.isArray(profiles))profiles=[]}catch{profiles=[]}
@@ -67,6 +146,7 @@ document.addEventListener('click',e=>{const edit=e.target.closest('[data-edit]')
 $('#modalCancel').addEventListener('click',()=>{$('#modal').classList.add('hidden');pendingDelete=null});
 $('#modalConfirm').addEventListener('click',()=>{if(pendingDelete){const p=profiles.find(x=>x.id===pendingDelete);profiles=profiles.filter(x=>x.id!==pendingDelete);persist();log('Deleted local profile: '+(p?.name||pendingDelete),'warn')}$('#modal').classList.add('hidden');pendingDelete=null});
 $('#clearConsole').addEventListener('click',()=>$('#consoleOutput').textContent='Console cleared. Waiting for backend connection.');
+if(falixKey){$('#falixKey').value=falixKey;setFalixState(false);$('#falixResult').textContent='A key is available in this tab. Click Connect and load servers to validate it.';}
 $('#testBackend').addEventListener('click',async()=>{const base=$('#backendUrl').value.trim().replace(/\/$/,'');const path=$('#apiRoute').value.trim();const out=$('#backendResult');if(!base){out.textContent='Enter a backend URL first.';return}let u;try{u=new URL(base)}catch{out.textContent='That URL is not valid.';return}if(u.protocol!=='https:'&&u.hostname!=='localhost'&&u.hostname!=='127.0.0.1'){out.textContent='Use HTTPS for remote backends.';return}out.textContent='Checking health endpoint…';try{const r=await fetch(base+(path.startsWith('/')?path:'/'+path),{method:'GET',headers:{'Accept':'application/json'},signal:AbortSignal.timeout(7000)});if(!r.ok)throw new Error('HTTP '+r.status);const data=await r.json();out.textContent='Health endpoint responded. Response: '+JSON.stringify(data).slice(0,250);log('Backend health check succeeded: '+base,'good')}catch(err){out.textContent='Could not verify backend: '+err.message+'. It may be offline, have CORS disabled, or use a different health route.';log('Backend health check failed: '+err.message,'warn')}});
 render();
 </script>
