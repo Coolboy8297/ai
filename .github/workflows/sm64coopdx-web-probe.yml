@@ -1,0 +1,67 @@
+name: SM64CoopDX WebAssembly feasibility probe
+
+on:
+  push:
+    branches:
+      - web-port-experiment
+    paths:
+      - "sm64coopdx/sm64coopdx-main/**"
+      - ".github/workflows/sm64coopdx-web-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  emscripten-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Install build tools and native SDL config utility
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git python3 libsdl2-dev libglew-dev libz-dev libcurl4-openssl-dev zip
+
+      - name: Record toolchain versions
+        run: |
+          emcc --version
+          em++ --version
+          emmake --version || true
+          make --version | head -n 1
+
+      - name: Attempt a diagnostic build (not a release build)
+        shell: bash
+        run: |
+          set +e
+          cd sm64coopdx/sm64coopdx-main
+          emmake make -j2 \
+            CC=emcc CXX=em++ CPP=emcc AS=emcc \
+            DISCORD_SDK=0 COOPNET=0 UPDATER=0 \
+            2>&1 | tee ../../../../sm64coopdx-web-build.log
+          result=${PIPESTATUS[0]}
+          echo "Build exit code: ${result}" | tee -a ../../../../sm64coopdx-web-build.log
+          {
+            echo "## SM64CoopDX WebAssembly feasibility probe"
+            echo
+            echo "- This is a diagnostic attempt, not a working browser build."
+            echo "- Native-only libraries, graphics calls, assembly, or linker flags may stop compilation."
+            echo "- Build exit code: ${result}"
+            echo
+            echo "Full compiler output is attached as the `sm64coopdx-web-build-log` artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "${result}"
+
+      - name: Upload diagnostic build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sm64coopdx-web-build-log
+          path: sm64coopdx-web-build.log
+          if-no-files-found: warn
+          retention-days: 14
